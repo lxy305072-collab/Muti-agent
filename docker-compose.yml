@@ -1,0 +1,33 @@
+
+services:
+  redis:
+    image: redis:7.2-alpine  # 推荐使用 alpine 版本，体积更小
+    container_name: my-redis-compose
+    restart: always           #  Docker 重启时自动重启容器
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/data    # 将数据挂载到当前目录的 redis-data 文件夹
+    # 如果没有挂载 redis.conf，可以直接用：
+    command: redis-server --appendonly yes --requirepass "MySecretPass123"
+
+  postgres:
+    # 官方镜像自带 pgvector 插件，免去手动编译烦恼
+    image: pgvector/pgvector:pg16
+    container_name: marketing-postgres
+    restart: always
+    environment:
+      POSTGRES_USER: myuser          # 用户名
+      POSTGRES_PASSWORD: 123456  # 密码
+      POSTGRES_DB: marketing_db      # 默认创建的数据库名
+    ports:
+      - "5432:5432"
+    volumes:
+      # 将数据持久化到本地当前目录的 ./pgdata 文件夹
+      - ./data/pgdata:/var/lib/postgresql/data
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+
+
+
+volumes:
+  redis-data:

@@ -1,0 +1,106 @@
+/*@tailwind base;*/
+/*@tailwind components;*/
+/*@tailwind utilities;*/
+
+/*body {*/
+/*  margin: 0;*/
+/*  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;*/
+/*  background-color: #f8fafc;*/
+/*}*/
+
+/*!* 自定义滚动条，让页面更精致 *!*/
+/*::-webkit-scrollbar {*/
+/*  width: 6px;*/
+/*  height: 6px;*/
+/*}*/
+/*::-webkit-scrollbar-track {*/
+/*  background: transparent;*/
+/*}*/
+/*::-webkit-scrollbar-thumb {*/
+/*  background: #cbd5e1;*/
+/*  border-radius: 3px;*/
+/*}*/
+/*::-webkit-scrollbar-thumb:hover {*/
+/*  background: #94a3b8;*/
+/*}*/
+
+/*!* 打字机光标闪烁动画 *!*/
+/*@keyframes blink {*/
+/*  0%, 100% { opacity: 1; }*/
+/*  50% { opacity: 0; }*/
+/*}*/
+/*.typing-cursor {*/
+/*  display: inline-block;*/
+/*  width: 2px;*/
+/*  height: 1em;*/
+/*  background-color: #10b981;*/
+/*  margin-left: 2px;*/
+/*  vertical-align: text-bottom;*/
+/*  animation: blink 1s infinite;*/
+/*}*/
+
+/*!* 背景网格纹理 *!*/
+/*.bg-grid {*/
+/*  background-image: radial-gradient(#e2e8f0 1px, transparent 1px);*/
+/*  background-size: 20px 20px;*/
+/*}*/
+
+
+
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  /* 暗黑科技感底色 */
+  background-color: #020617;
+  color: #e2e8f0;
+}
+
+/* 深色滚动条 */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: #334155; /* slate-700 */
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #475569; /* slate-600 */
+}
+
+/* 打字机光标闪烁动画 */
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
+}
+.typing-cursor {
+  display: inline-block;
+  width: 2px;
+  height: 1em;
+  background-color: #2dd4bf; /* teal-400 */
+  margin-left: 2px;
+  vertical-align: text-bottom;
+  animation: blink 1s infinite;
+}
+
+/* 背景网格纹理 (调淡颜色，增加科技感) */
+.bg-grid {
+  background-image: radial-gradient(rgba(148, 163, 184, 0.15) 1px, transparent 1px);
+  background-size: 24px 24px;
+}
+
+/* 背景微光晕 */
+.bg-glow {
+  background-color: #020617;
+  background-image:
+    radial-gradient(at 0% 0%, rgba(45, 212, 191, 0.1) 0px, transparent 50%),
+    radial-gradient(at 100% 100%, rgba(13, 148, 136, 0.1) 0px, transparent 50%);
+}

@@ -1,0 +1,15 @@
+streamlit>=1.33.0
+requests>=2.31.0
+fastapi>=0.110.0
+uvicorn[standard]>=0.29.0
+pydantic>=2.6.0
+python-dotenv>=1.0.0
+
+# LangGraph 核心及 SQLite 持久化组件
+langgraph>=0.1.0
+langgraph-checkpoint-sqlite>=1.0.0
+
+# 大模型 SDK
+openai>=1.14.0
+dashscope>=1.17.0
+redis~=8.0.1
