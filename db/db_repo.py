@@ -2,13 +2,14 @@
 import asyncio
 
 import asyncpg
-import os
 import json
 from typing import List, Dict, Optional
 
 import dashscope
 
 from config import settings
+# 🔥 核心修复：显式设置 API Key
+dashscope.api_key = settings.DASHSCOPE_API_KEY
 
 
 class DatabaseRepo:
@@ -159,6 +160,12 @@ class DatabaseRepo:
         if not documents:
             return []
 
+        # 🔥 核心新增：如果召回的文档数量已经小于等于需要的数量，直接返回，无需调大模型精排
+        if len(documents) <= top_n:
+            for doc in documents:
+                doc['rerank_score'] = 1.0
+            return documents
+
         # 1. 构造 Re-rank 输入数据
         doc_texts = []
         for i, doc in enumerate(documents):
@@ -198,30 +205,45 @@ class DatabaseRepo:
                     text_content = response.output.text
 
                 if text_content:
-                    result_dict = json.loads(text_content)
-                    best_indices = result_dict.get("best_indices", [])[:top_n]
+                    try:
+                        # 🔥 核心增强：使用正则提取 JSON，防止大模型输出多余的 markdown 标记
+                        import re
+                        match = re.search(r'\{.*\}', text_content, re.DOTALL)
+                        clean_json = match.group(0) if match else text_content
+                        result_dict = json.loads(clean_json)
 
-                    reranked_results = []
-                    for idx in best_indices:
-                        if isinstance(idx, int) and 0 <= idx < len(documents):
-                            doc = documents[idx]
-                            doc['rerank_score'] = 1.0  # 模拟一个满分得分，保持数据结构一致
-                            reranked_results.append(doc)
+                        best_indices = result_dict.get("best_indices", [])
 
-                    if reranked_results:
-                        return reranked_results
-                    else:
-                        print("⚠️ LLM Rerank 未返回有效索引，降级使用原始向量检索结果")
+                        # 🔥 核心增强：兼容字符串类型的索引
+                        if isinstance(best_indices, str):
+                            best_indices = [best_indices]
+
+                        reranked_results = []
+                        for idx in best_indices:
+                            try:
+                                idx_int = int(idx)  # 强转为 int
+                                if 0 <= idx_int < len(documents):
+                                    doc = documents[idx_int]
+                                    doc['rerank_score'] = 1.0
+                                    reranked_results.append(doc)
+                            except (ValueError, TypeError):
+                                continue
+
+                        if reranked_results:
+                            return reranked_results
+                        else:
+                            # print(f"⚠️ LLM Rerank 解析出的索引无效，原始返回: {text_content}")
+                            print(f"ℹ️ LLM 判断召回的文档与查询相关性较低，不注入 RAG 上下文。")
+                            return []
+                    except Exception as parse_e:
+                        print(f"⚠️ LLM Rerank JSON 解析失败: {parse_e}, 原始返回: {text_content}")
                         return documents[:top_n]
             else:
                 print(f"⚠️ LLM Rerank 调用失败，降级使用原始结果: {response.code} - {response.message}")
                 return documents[:top_n]
-
         except Exception as e:
             print(f"⚠️ LLM Rerank 异常，降级使用原始结果: {e}")
             return documents[:top_n]
-
-
 
 
 

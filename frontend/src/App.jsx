@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { startWorkflow, resumeWorkflow, getHistory, rateMaterial, deleteMaterial } from './api';
-import { Sparkles, Loader2, Cpu, Check, AlertCircle, Wand2, FileText, Tag, Copy, History, Trash2, Star, ArrowLeft } from 'lucide-react';
+import { Sparkles, Loader2, Cpu, Check, AlertCircle, Wand2, FileText, Tag, Copy, History, Trash2, Star, ArrowLeft, RotateCcw } from 'lucide-react';
 
 function App() {
   const [formData, setFormData] = useState({
@@ -115,6 +115,23 @@ function App() {
     }
   };
 
+  // 🔥 新增：统一的清空与重置函数
+  const handleReset = () => {
+    // 1. 清空左侧表单数据
+    setFormData({product_name: '', key_features: '', target_audience: '', platform: 'general'});
+    // 2. 清空右侧生成状态
+    setTitle('');
+    setBody('');
+    setLogs([]);
+    setImageUrl('');
+    setThreadId(null);
+    setIsInterrupted(false);
+    setRateSuccess(false);
+    setCurrentScore(80);
+    setFeedback('');
+    // 3. 聚焦到产品名称输入框
+    setTimeout(() => document.querySelector('input[name="product_name"]')?.focus(), 100);
+  };
   const tags = body.match(/#[^\s#]+/g) || [];
 
   const agentSteps = [
@@ -279,7 +296,15 @@ function App() {
                       <button onClick={handleApprove} className="flex-1 bg-teal-500 text-slate-900 text-sm font-semibold py-2.5 rounded-lg hover:bg-teal-400 transition-colors flex items-center justify-center gap-2"><Check size={16} /> 审核通过，生成配图</button>
                       <button onClick={handleReject} className="flex-1 bg-transparent border border-red-500/30 text-red-400 text-sm font-medium py-2.5 rounded-lg hover:bg-red-500/10 transition-colors flex items-center justify-center gap-2"><AlertCircle size={16} /> 打回重写</button>
                     </div>
-                  </div>
+
+                  {/* 🔥 新增：人工审核阶段的重新配置按钮 */}
+                  <button
+                    onClick={handleReset}
+                    className="w-full mt-3 bg-slate-800 text-slate-300 text-sm font-medium py-2.5 rounded-lg hover:bg-slate-700 transition-colors border border-slate-700 flex items-center justify-center gap-2"
+                  >
+                    <RotateCcw size={14} /> 放弃当前结果，重新配置任务
+                  </button>
+                </div>
                 )}
 
                 {/* 打分面板与重置按钮 */}
@@ -301,8 +326,14 @@ function App() {
                       )}
                       <p className="text-xs text-slate-500 mt-2">评分 ≥90 分的物料将自动沉淀至 RAG 知识库供后续参考</p>
                     </div>
+                    {/* 重新配置任务按钮 */}
                     <div className="text-center">
-                      <button onClick={() => { setTitle(''); setBody(''); setLogs([]); setImageUrl(''); setThreadId(null); setIsInterrupted(false); setRateSuccess(false); setCurrentScore(80); document.querySelector('input[name="product_name"]')?.focus(); }} className="bg-slate-800 text-slate-300 text-sm font-medium px-6 py-2.5 rounded-lg hover:bg-slate-700 transition-colors border border-slate-700">重新配置任务</button>
+                      <button
+                        onClick={handleReset}
+                        className="bg-slate-800 text-slate-300 text-sm font-medium px-6 py-2.5 rounded-lg hover:bg-slate-700 transition-colors border border-slate-700 inline-flex items-center gap-2"
+                      >
+                        <RotateCcw size={14} /> 重新配置任务
+                      </button>
                     </div>
                   </>
                 )}

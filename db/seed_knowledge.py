@@ -1,15 +1,14 @@
 # seed_knowledge.py
 import asyncio
-import os
 import asyncpg
 import dashscope
-from dotenv import load_dotenv
+from config import settings  # 🔥 引入配置中心
 
-load_dotenv()
-dashscope.api_key = os.getenv("DASHSCOPE_API_KEY")
-DB_URI = os.getenv("POSTGRES_URI", "postgresql://myuser:123456@127.0.0.1:5432/marketing_db")
+# 从配置中心读取
+dashscope.api_key = settings.DASHSCOPE_API_KEY
+DB_URI = settings.POSTGRES_URI
 
-# 准备要存入的知识库数据
+# 准备要存入的知识库数据 (你可以在这里多加几条通用的范例)
 KNOWLEDGE_DATA = [
     {
         "doc_type": "brand_guide",
@@ -28,7 +27,6 @@ KNOWLEDGE_DATA = [
     }
 ]
 
-
 async def get_embedding(text: str) -> list:
     """调用 DashScope 获取文本向量"""
     rsp = await asyncio.to_thread(
@@ -42,28 +40,28 @@ async def get_embedding(text: str) -> list:
         return rsp.output["embeddings"][0]["embedding"]
     raise Exception(f"获取向量失败: {rsp.message}")
 
-
 async def main():
     pool = await asyncpg.create_pool(dsn=DB_URI)
     print("🔗 已连接数据库，开始写入知识库...")
 
     for doc in KNOWLEDGE_DATA:
-        # 1. 把内容转成向量
         print(f"正在向量化: {doc['title']}...")
         embedding = await get_embedding(doc['content'])
         vec_str = "[" + ",".join(map(str, embedding)) + "]"
 
-        # 2. 存入数据库
         async with pool.acquire() as conn:
+            # 🔥 优化：使用 ON CONFLICT 防止重复运行脚本时数据重复插入
             await conn.execute("""
-                               INSERT INTO knowledge_docs (doc_type, title, content, embedding)
-                               VALUES ($1, $2, $3, $4::vector)
-                               """, doc['doc_type'], doc['title'], doc['content'], vec_str)
+                INSERT INTO knowledge_docs (doc_type, title, content, embedding)
+                VALUES ($1, $2, $3, $4::vector)
+                ON CONFLICT (title) DO UPDATE SET 
+                    content=EXCLUDED.content, 
+                    embedding=EXCLUDED.embedding
+            """, doc['doc_type'], doc['title'], doc['content'], vec_str)
         print(f"✅ 已写入: {doc['title']}")
 
     await pool.close()
     print("🎉 知识库初始化完成！")
-
 
 if __name__ == "__main__":
     asyncio.run(main())
