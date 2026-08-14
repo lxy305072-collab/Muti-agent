@@ -19,6 +19,8 @@ function App() {
   const [reviewPassed, setReviewPassed] = useState(false);
   const [currentScore, setCurrentScore] = useState(80);
   const [rateSuccess, setRateSuccess] = useState(false);
+  const [historyRateSuccess, setHistoryRateSuccess] = useState(false); // 🔥 新增
+
 
   const [activeTab, setActiveTab] = useState('workspace');
   const [historyList, setHistoryList] = useState([]);
@@ -98,9 +100,28 @@ function App() {
     });
   };
 
-  const handleRate = async (id) => {
-    await rateMaterial(id, currentScore);
-    setRateSuccess(true);
+  // 提交打分
+  // 🔥 修改：增加 score 参数，如果不传则默认用 currentScore
+  const handleRate = async (id, score = currentScore) => {
+    await rateMaterial(id, parseInt(score));
+
+    // 🔥 新增：判断是工作台还是详情页，触发对应反馈
+    if (id === threadId) {
+      setRateSuccess(true);
+    } else {
+      setHistoryRateSuccess(true);
+      setTimeout(() => setHistoryRateSuccess(false), 2000); // 2秒后恢复按钮
+    }
+
+
+    // 🔥 新增：如果是历史详情页，同步更新历史列表里的分数
+    setHistoryList(prev => prev.map(item =>
+      item.thread_id === id ? { ...item, quality_score: parseInt(score) } : item
+    ));
+    // 🔥 新增：同步更新当前选中的详情数据
+    if (selectedHistory?.thread_id === id) {
+      setSelectedHistory(prev => ({ ...prev, quality_score: parseInt(score) }));
+    }
   };
 
   const handleDelete = async (id) => {
@@ -369,7 +390,16 @@ function App() {
                           </div>
                           <div className="mt-4 flex items-center gap-2">
                             <input type="range" min="0" max="100" defaultValue={selectedHistory.quality_score || 80} onChange={(e) => setSelectedHistory({...selectedHistory, quality_score: e.target.value})} className="flex-1 accent-teal-400" />
-                            <button onClick={() => handleRate(selectedHistory.thread_id)} className="bg-slate-100 text-slate-900 text-sm px-4 py-2 rounded-lg">更新评分</button>
+                            {historyRateSuccess ? (
+                              <span className="text-teal-400 text-sm font-medium px-4 py-2">✓ 评分已更新</span>
+                            ) : (
+                              <button
+                                onClick={() => handleRate(selectedHistory.thread_id, selectedHistory.quality_score)}
+                                className="bg-slate-100 text-slate-900 text-sm px-4 py-2 rounded-lg hover:bg-white"
+                              >
+                                更新评分
+                              </button>
+                            )}
                           </div>
                         </div>
                       </div>
