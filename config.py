@@ -12,7 +12,6 @@ class Settings(BaseSettings):
 
     # 阿里云 DashScope 配置
     DASHSCOPE_API_KEY: str = ""
-    DASH_API_KEY: str = ""
 
     # 项目路径配置 (建议在 .env 中配置绝对路径)
     PROJECT_ROOT: str = os.path.dirname(os.path.abspath(__file__))
