@@ -8,6 +8,8 @@ from typing import List, Dict, Optional
 
 import dashscope
 
+from config import settings
+
 
 class DatabaseRepo:
     def __init__(self, pool: asyncpg.Pool):
@@ -145,10 +147,10 @@ class DatabaseRepo:
         return [dict(r) for r in rows]
 
 
-    # 🔥 新增：调用 DashScope Re-rank 模型的独立方法
+    # 🔥 新增：调用 LLM 进行重排序的独立方法 (替代 gte-rerank)
     async def rerank_documents(self, query: str, documents: list, top_n: int = 1) -> list:
         """
-        使用 DashScope gte-rerank 模型对召回的文档进行重排序
+        使用 LLM (大模型) 对召回的文档进行重排序
         :param query: 用户查询词
         :param documents: 召回的文档列表 (字典列表)
         :param top_n: 重排后返回前几个
@@ -158,47 +160,66 @@ class DatabaseRepo:
             return []
 
         # 1. 构造 Re-rank 输入数据
-        # 将字典内容拼接成纯文本，模型才能理解
         doc_texts = []
-        for doc in documents:
+        for i, doc in enumerate(documents):
             if 'content' in doc:  # 知识库文档
                 text = f"标题: {doc.get('title', '')}\n内容: {doc.get('content', '')}"
             else:  # 历史物料
                 text = f"标题: {doc.get('title', '')}\n正文: {doc.get('body', '')}"
-            doc_texts.append(text)
+            doc_texts.append(f"[{i}] {text}")
 
         try:
-            # 2. 调用 DashScope Re-rank API (同步转异步)
-            rsp = await asyncio.to_thread(
-                dashscope.TextReRank.call,
-                model="gte-rerank",  # 阿里云通用重排模型
-                query=query,
-                documents=doc_texts,
-                top_n=top_n,
-                return_documents=False  # 只返回 index 和 score，不返回原文，省 token
+            # 2. 构造 Prompt，让大模型选出最相关的索引
+            prompt = f"""
+            你是一个智能分析助手。请根据用户的【查询词】，从下方的【候选信息列表】中选出最相关的 {top_n} 条信息。
+            你只需要返回一个 JSON，格式为：{{"best_indices": [序号1, 序号2]}}。绝对不要输出其他任何解释性文字。
+
+            【查询词】：{query}
+
+            【候选信息列表】：
+            {chr(10).join(doc_texts)}
+            """
+
+            # 3. 调用轻量级大模型 (qwen-turbo 速度快、成本低)
+            response = await asyncio.to_thread(
+                dashscope.Generation.call,
+                model="qwen-turbo",
+                prompt=prompt,
+                response_format={"type": "json_object"}
             )
 
-            if rsp.status_code == 200 and rsp.output:
-                reranked_results = []
-                # 3. 根据 rerank 返回的 index，重新组织原始数据
-                for item in rsp.output.results:
-                    original_doc_index = item.index
-                    relevance_score = item.relevance_score
-                    # 取出原始完整字典，并附加重排序得分
-                    doc_with_score = documents[original_doc_index]
-                    doc_with_score['rerank_score'] = relevance_score
-                    reranked_results.append(doc_with_score)
-                return reranked_results
+            if response.status_code == 200:
+                # 兼容不同版本 SDK 的返回结构
+                text_content = None
+                if hasattr(response.output, 'choices') and response.output.choices:
+                    if response.output.choices[0] and hasattr(response.output.choices[0], 'message'):
+                        text_content = response.output.choices[0].message.content
+                if text_content is None and hasattr(response.output, 'text'):
+                    text_content = response.output.text
+
+                if text_content:
+                    result_dict = json.loads(text_content)
+                    best_indices = result_dict.get("best_indices", [])[:top_n]
+
+                    reranked_results = []
+                    for idx in best_indices:
+                        if isinstance(idx, int) and 0 <= idx < len(documents):
+                            doc = documents[idx]
+                            doc['rerank_score'] = 1.0  # 模拟一个满分得分，保持数据结构一致
+                            reranked_results.append(doc)
+
+                    if reranked_results:
+                        return reranked_results
+                    else:
+                        print("⚠️ LLM Rerank 未返回有效索引，降级使用原始向量检索结果")
+                        return documents[:top_n]
             else:
-                print(f"⚠️ Rerank 调用失败，降级使用原始向量检索结果: {rsp.code} - {rsp.message}")
-                # 降级策略：如果 rerank 挂了，直接返回原始召回的前 top_n 个
+                print(f"⚠️ LLM Rerank 调用失败，降级使用原始结果: {response.code} - {response.message}")
                 return documents[:top_n]
+
         except Exception as e:
-            print(f"⚠️ Rerank 异常，降级使用原始向量检索结果: {e}")
+            print(f"⚠️ LLM Rerank 异常，降级使用原始结果: {e}")
             return documents[:top_n]
-
-
-
 
 
 

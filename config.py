@@ -23,6 +23,7 @@ class Settings(BaseSettings):
     MODEL_IMAGE: str = "wanx-v1"
     MODEL_VISION: str = "qwen-vl-plus"
     MODEL_PROMPT_REWRITER: str = "qwen-turbo"
+    MODEL_RERANK: str = "gte-rerank"
 
     model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8", extra='ignore')
 

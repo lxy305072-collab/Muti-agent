@@ -120,7 +120,7 @@ async def researcher_node(state: CampaignState):
     finally:
         end_node_log("researcher", "🔬", _start_ts, error=_error)
 
-
+# ============================== 模型审核节点===================================
 class CriticSchema(BaseModel):
     passed: bool
     title_feedback: str
@@ -168,6 +168,7 @@ async def critic_node(state: CampaignState):
         end_node_log("critic", "🧐", _start_ts, error=_error)
 
 
+#================================= 生成文案节点 =========================================
 async def copywriter_node(state: CampaignState):
     _start_ts = start_node_log("copywriter", "✍️", state)
     _error = None
@@ -317,6 +318,7 @@ async def copywriter_node(state: CampaignState):
         end_node_log("copywriter", "✍️", _start_ts, error=_error)
 
 
+#======================================== 自动适配节点 ==================================================
 class ChannelAdapterSchema(BaseModel):
     title: str = Field(description="根据渠道风格重写的标题")
     body: str = Field(description="根据渠道风格重写的正文")
