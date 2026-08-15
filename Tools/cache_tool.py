@@ -13,8 +13,8 @@ load_dotenv()
 redis_pool = redis.ConnectionPool.from_url(
     settings.REDIS_URL,
     decode_responses=True,
-    socket_connect_timeout=1.0,  # 给 1 秒连接时间
-    socket_timeout=1.0,          # 读写超时 1 秒
+    socket_connect_timeout=5.0,  # 给 1 秒连接时间
+    socket_timeout=10.0,          # 读写超时 1 秒
     retry_on_timeout=False
 )
 

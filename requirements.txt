@@ -12,4 +12,4 @@ langgraph-checkpoint-sqlite>=1.0.0
 # 大模型 SDK
 openai>=1.14.0
 dashscope>=1.17.0
-redis~=8.0.1
+redis~=5.3.1

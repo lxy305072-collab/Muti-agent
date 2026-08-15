@@ -1,0 +1,90 @@
+2026-08-15 09:13:22 | INFO     | 8006238d | server:trace_id_middleware:57 - 📥 收到请求: GET /api/history
+2026-08-15 09:13:22 | INFO     | c33fcdd5 | server:trace_id_middleware:57 - 📥 收到请求: GET /images/70df12bb-fb86-46e6-95dc-0403d3227208.png
+2026-08-15 09:13:22 | INFO     | 86b7cfe1 | server:trace_id_middleware:57 - 📥 收到请求: GET /images/a7bd5c65-ffa8-483e-95cd-ac2ee6082ccf.png
+2026-08-15 09:13:22 | INFO     | 1da9503c | server:trace_id_middleware:57 - 📥 收到请求: GET /images/d96ebe20-632f-4e02-86a7-308c0c4eecbb.png
+2026-08-15 09:13:22 | INFO     | db0cdd73 | server:trace_id_middleware:57 - 📥 收到请求: GET /images/1086ea75-3475-4850-abf3-2d925b542cf2.png
+2026-08-15 09:13:22 | INFO     | bb752411 | server:trace_id_middleware:57 - 📥 收到请求: GET /images/cb307f15-721f-4a8c-aa50-a89fad9d84ea.png
+2026-08-15 09:13:22 | INFO     | 2c893890 | server:trace_id_middleware:57 - 📥 收到请求: GET /images/3d84e402-5ae2-4b3e-935d-0bc088d1e987.png
+2026-08-15 09:13:22 | INFO     | c33fcdd5 | server:trace_id_middleware:60 - 📤 请求完成: Status 304
+2026-08-15 09:13:22 | INFO     | 86b7cfe1 | server:trace_id_middleware:60 - 📤 请求完成: Status 304
+2026-08-15 09:13:22 | INFO     | db0cdd73 | server:trace_id_middleware:60 - 📤 请求完成: Status 304
+2026-08-15 09:13:22 | INFO     | 1da9503c | server:trace_id_middleware:60 - 📤 请求完成: Status 304
+2026-08-15 09:13:22 | INFO     | 2c893890 | server:trace_id_middleware:60 - 📤 请求完成: Status 304
+2026-08-15 09:13:22 | INFO     | bb752411 | server:trace_id_middleware:60 - 📤 请求完成: Status 304
+2026-08-15 09:13:22 | INFO     | 804d0f1d | server:trace_id_middleware:57 - 📥 收到请求: GET /images/e0b90f8e-8ec5-4a3c-9a52-f93cd733efed.png
+2026-08-15 09:13:22 | INFO     | ae014855 | server:trace_id_middleware:57 - 📥 收到请求: GET /images/3f6d8ff5-b308-4f82-84f4-69e973f16fd0.png
+2026-08-15 09:13:22 | INFO     | e0be509f | server:trace_id_middleware:57 - 📥 收到请求: GET /images/383a2525-fda3-48ba-aa9d-0bc0c9e7d3ae.png
+2026-08-15 09:13:22 | INFO     | ae014855 | server:trace_id_middleware:60 - 📤 请求完成: Status 304
+2026-08-15 09:13:22 | INFO     | 804d0f1d | server:trace_id_middleware:60 - 📤 请求完成: Status 304
+2026-08-15 09:13:22 | INFO     | e0be509f | server:trace_id_middleware:60 - 📤 请求完成: Status 304
+2026-08-15 09:13:22 | INFO     | 8006238d | server:trace_id_middleware:60 - 📤 请求完成: Status 200
+2026-08-15 09:15:29 | INFO     | 7af206da | server:trace_id_middleware:57 - 📥 收到请求: GET /api/history
+2026-08-15 09:15:29 | INFO     | 7af206da | server:trace_id_middleware:60 - 📤 请求完成: Status 200
+2026-08-15 09:52:30 | INFO     | f39def75 | server:trace_id_middleware:57 - 📥 收到请求: GET /api/history
+2026-08-15 09:52:30 | INFO     | f39def75 | server:trace_id_middleware:60 - 📤 请求完成: Status 200
+2026-08-15 09:52:46 | INFO     | 3519f32d | server:trace_id_middleware:57 - 📥 收到请求: GET /api/history
+2026-08-15 09:52:46 | INFO     | 3519f32d | server:trace_id_middleware:60 - 📤 请求完成: Status 200
+2026-08-15 10:51:06 | INFO     | f9113193 | node_timer:start_node_log:11 - 🔬 [researcher] 节点开始运行...
+2026-08-15 10:51:14 | INFO     | f9113193 | node_timer:end_node_log:22 - ✅ [researcher] 节点运行完毕, 耗时: 8.25s
+2026-08-15 10:51:14 | INFO     | f9113193 | node_timer:start_node_log:11 - ✍️ [copywriter] 节点开始运行...
+2026-08-15 10:51:14 | INFO     | f9113193 | graph_engine:copywriter_node:176 - ⏳ [Node: Copywriter] 正在生成文案...
+2026-08-15 10:51:20 | INFO     | f9113193 | node_timer:end_node_log:22 - ✅ [copywriter] 节点运行完毕, 耗时: 6.18s
+2026-08-15 10:51:20 | INFO     | f9113193 | node_timer:start_node_log:11 - 🧐 [critic] 节点开始运行...
+2026-08-15 10:51:32 | INFO     | f9113193 | node_timer:end_node_log:22 - ✅ [critic] 节点运行完毕, 耗时: 11.69s
+2026-08-15 10:51:32 | INFO     | f9113193 | node_timer:start_node_log:11 - 📱 [channel_adapter] 节点开始运行...
+2026-08-15 10:51:32 | INFO     | f9113193 | graph_engine:channel_adapter_node:336 - ⏳ [Node: ChannelAdapter] 正在适配渠道风格: 小红书
+2026-08-15 10:51:37 | INFO     | f9113193 | graph_engine:channel_adapter_node:357 - ✅ [Node: ChannelAdapter] 适配完成！新标题: 救命！锁骨上突然长了颗星星✨戴它被追着问...
+2026-08-15 10:51:37 | INFO     | f9113193 | node_timer:end_node_log:22 - ✅ [channel_adapter] 节点运行完毕, 耗时: 5.37s
+2026-08-15 10:51:38 | INFO     | f9113193 | server:event_generator:186 - ✅ 阶段1生成完毕，工作流已挂起等待人工审核。
+2026-08-15 10:51:43 | INFO     | 3ae913bf | node_timer:start_node_log:11 - 🎨 [image_generator] 节点开始运行...
+2026-08-15 10:51:43 | INFO     | 3ae913bf | graph_engine:image_generator_node:379 - ⏳ [Node: ImageGen] 正在根据 Prompt 生成图片: 一位轻熟女站在都市窗边，阳光洒在锁骨间，一条精致的星芒设计莫桑钻锁骨链在18K金光泽中闪烁璀璨火彩，...
+2026-08-15 10:52:16 | INFO     | 3ae913bf | node_timer:end_node_log:22 - ✅ [image_generator] 节点运行完毕, 耗时: 32.36s
+2026-08-15 10:52:16 | INFO     | 3ae913bf | node_timer:start_node_log:11 - 🔍 [visual_reviewer] 节点开始运行...
+2026-08-15 10:52:16 | INFO     | 3ae913bf | graph_engine:visual_reviewer_node:445 - ⏳ [Node: VisualReviewer] 正在进行图文一致性审查...
+2026-08-15 10:52:16 | INFO     | 3ae913bf | node_timer:end_node_log:22 - ✅ [visual_reviewer] 节点运行完毕, 耗时: 0.30s
+2026-08-15 10:52:16 | INFO     | 3ae913bf | server:event_generator:288 - 🎉 工作流全部执行完毕！
+2026-08-15 13:49:19 | INFO     | 34d8ea68 | server:start_workflow:246 - 📥 任务已派发至队列，thread_id: 11c5c3da-459b-480a-a63c-304dd8c86996
+2026-08-15 13:49:20 | INFO     | e745d191 | server:start_workflow:246 - 📥 任务已派发至队列，thread_id: a307e89a-59f9-4856-a0ee-1848ab226584
+2026-08-15 13:49:21 | WARNING  | 2ac27f3a | server:start_workflow:221 - ⚠️ IP 127.0.0.1 触发限流
+2026-08-15 13:49:22 | WARNING  | 3525086a | server:start_workflow:221 - ⚠️ IP 127.0.0.1 触发限流
+2026-08-15 13:49:23 | WARNING  | 56a052b0 | server:start_workflow:221 - ⚠️ IP 127.0.0.1 触发限流
+2026-08-15 13:49:24 | WARNING  | 6130e9de | server:start_workflow:221 - ⚠️ IP 127.0.0.1 触发限流
+2026-08-15 13:49:25 | WARNING  | aa03a7ed | server:start_workflow:221 - ⚠️ IP 127.0.0.1 触发限流
+2026-08-15 13:49:26 | WARNING  | 523a31bb | server:start_workflow:221 - ⚠️ IP 127.0.0.1 触发限流
+2026-08-15 13:49:27 | WARNING  | 282d9e33 | server:start_workflow:221 - ⚠️ IP 127.0.0.1 触发限流
+2026-08-15 13:49:28 | WARNING  | 3cdbe485 | server:start_workflow:221 - ⚠️ IP 127.0.0.1 触发限流
+2026-08-15 13:49:29 | INFO     | fe614051 | server:start_workflow:246 - 📥 任务已派发至队列，thread_id: 26ea3d98-8ad5-4ee9-bc2d-1fcc91017a53
+2026-08-15 13:49:30 | INFO     | 4039216f | server:start_workflow:246 - 📥 任务已派发至队列，thread_id: 75124087-4041-41d9-a1ff-2a6fbb0bd627
+2026-08-15 13:49:31 | WARNING  | bfc2b453 | server:start_workflow:221 - ⚠️ IP 127.0.0.1 触发限流
+2026-08-15 13:49:32 | WARNING  | 9182f17b | server:start_workflow:221 - ⚠️ IP 127.0.0.1 触发限流
+2026-08-15 13:49:33 | WARNING  | 4c94b336 | server:start_workflow:221 - ⚠️ IP 127.0.0.1 触发限流
+2026-08-15 13:49:34 | WARNING  | 777ed2f4 | server:start_workflow:221 - ⚠️ IP 127.0.0.1 触发限流
+2026-08-15 13:49:35 | WARNING  | 5888933e | server:start_workflow:221 - ⚠️ IP 127.0.0.1 触发限流
+2026-08-15 13:49:36 | WARNING  | c24edc74 | server:start_workflow:221 - ⚠️ IP 127.0.0.1 触发限流
+2026-08-15 13:49:37 | WARNING  | 099d068e | server:start_workflow:221 - ⚠️ IP 127.0.0.1 触发限流
+2026-08-15 13:49:38 | WARNING  | 57c65c01 | server:start_workflow:221 - ⚠️ IP 127.0.0.1 触发限流
+2026-08-15 13:49:39 | INFO     | 4c3a436f | server:start_workflow:246 - 📥 任务已派发至队列，thread_id: 54798428-6997-4243-92c9-3b0afb2167c6
+2026-08-15 13:49:40 | INFO     | 08d46d55 | server:start_workflow:246 - 📥 任务已派发至队列，thread_id: 29ae2e89-2a1d-470d-8d31-f856fa38fa09
+2026-08-15 13:49:41 | WARNING  | 67ba25db | server:start_workflow:221 - ⚠️ IP 127.0.0.1 触发限流
+2026-08-15 13:49:42 | WARNING  | 1a31d187 | server:start_workflow:221 - ⚠️ IP 127.0.0.1 触发限流
+2026-08-15 13:49:43 | WARNING  | d799e302 | server:start_workflow:221 - ⚠️ IP 127.0.0.1 触发限流
+2026-08-15 13:49:44 | WARNING  | 6ed70427 | server:start_workflow:221 - ⚠️ IP 127.0.0.1 触发限流
+2026-08-15 13:49:45 | WARNING  | 0591e4ea | server:start_workflow:221 - ⚠️ IP 127.0.0.1 触发限流
+2026-08-15 13:49:46 | WARNING  | 6f993db3 | server:start_workflow:221 - ⚠️ IP 127.0.0.1 触发限流
+2026-08-15 13:49:47 | WARNING  | 12e2eaf3 | server:start_workflow:221 - ⚠️ IP 127.0.0.1 触发限流
+2026-08-15 13:49:48 | WARNING  | 720a83fa | server:start_workflow:221 - ⚠️ IP 127.0.0.1 触发限流
+2026-08-15 13:49:49 | INFO     | 2ce569db | server:start_workflow:246 - 📥 任务已派发至队列，thread_id: e5399a64-1744-4af5-8ead-7f54067a29a8
+2026-08-15 13:49:50 | INFO     | ce9a86a8 | server:start_workflow:246 - 📥 任务已派发至队列，thread_id: 592d12bd-f6d8-4d5f-a45f-5e7db1b06189
+2026-08-15 13:49:51 | WARNING  | 8c677830 | server:start_workflow:221 - ⚠️ IP 127.0.0.1 触发限流
+2026-08-15 13:49:52 | WARNING  | 31832b32 | server:start_workflow:221 - ⚠️ IP 127.0.0.1 触发限流
+2026-08-15 14:05:07 | INFO     | 07094c33 | server:start_workflow:246 - 📥 任务已派发至队列，thread_id: 275f92cc-4ae2-4bf2-8cd5-ab4efe929869
+2026-08-15 14:13:50 | INFO     | 5ac3a254 | server:start_workflow:246 - 📥 任务已派发至队列，thread_id: bf5668f5-01c1-40af-9b0e-7c1d6e7fb431
+2026-08-15 14:18:47 | INFO     | 1d2f87e8 | server:start_workflow:246 - 📥 任务已派发至队列，thread_id: 53ff4a24-b011-4098-839f-2e9160f0c88e
+2026-08-15 14:24:24 | INFO     | e2242483 | server:start_workflow:246 - 📥 任务已派发至队列，thread_id: 3d283053-d504-467a-aeb2-420ebd48581d
+2026-08-15 14:24:59 | INFO     | 711f02f7 | server:start_workflow:246 - 📥 任务已派发至队列，thread_id: 16f717e0-4363-4a25-9e2d-9fb8d4c7c1af
+2026-08-15 14:33:00 | INFO     | 17b63642 | server:start_workflow:246 - 📥 任务已派发至队列，thread_id: c996831c-0965-41e2-9f2d-d00df3a0eb92
+2026-08-15 14:36:59 | INFO     | 9125a1e9 | server:start_workflow:246 - 📥 任务已派发至队列，thread_id: 1a88ca71-8d86-462a-bdeb-2a62c73dc36d
+2026-08-15 14:38:32 | INFO     | a79e841a | server:start_workflow:246 - 📥 任务已派发至队列，thread_id: a6a2d05d-ebea-436d-ba5b-18ea34c60c03
+2026-08-15 14:42:55 | INFO     | 4edcb06f | server:start_workflow:246 - 📥 任务已派发至队列，thread_id: 32ec124b-d90f-436b-a97a-dfe27639f868
+2026-08-15 14:50:28 | INFO     | 04923e3c | server:start_workflow:246 - 📥 任务已派发至队列，thread_id: cf080c10-81fe-4719-9007-a624d26added
+2026-08-15 14:54:47 | INFO     | 96c14802 | server:start_workflow:246 - 📥 任务已派发至队列，thread_id: a05b8281-dafa-41d0-9355-e926b08c910f

@@ -27,19 +27,24 @@ class CampaignState(TypedDict):
     product_name: str
     key_features: str
     target_audience: str
+
     platform: str
     title: str
     body: str
+
     image_prompt: str
     stream_text: str
     image_url: Optional[str]
+
     review_passed: bool
     review_feedback: str
     retry_count: int
+
     feedback: str
     research_context: str
     critic_feedback: str
     critic_passed: bool
+
     copy_revision_count: int
     quality_score: int
     judge_result: dict
@@ -54,6 +59,7 @@ def extract_json(text):
     return match.group(0) if match else text
 
 
+#=============================== research 节点 ====================================
 class ResearchSchema(BaseModel):
     key_selling_points: str
     target_persona: str

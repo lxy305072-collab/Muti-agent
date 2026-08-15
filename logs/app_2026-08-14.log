@@ -317,3 +317,133 @@
 2026-08-14 15:15:51 | INFO     | 69622ed3 | server:trace_id_middleware:57 - 📥 收到请求: GET /images/e0b90f8e-8ec5-4a3c-9a52-f93cd733efed.png
 2026-08-14 15:15:51 | INFO     | eb2953f1 | server:trace_id_middleware:60 - 📤 请求完成: Status 304
 2026-08-14 15:15:51 | INFO     | 69622ed3 | server:trace_id_middleware:60 - 📤 请求完成: Status 304
+2026-08-14 15:32:46 | INFO     | c217be46 | server:trace_id_middleware:57 - 📥 收到请求: GET /api/history
+2026-08-14 15:32:46 | INFO     | 30dc13a0 | server:trace_id_middleware:57 - 📥 收到请求: GET /images/3f6d8ff5-b308-4f82-84f4-69e973f16fd0.png
+2026-08-14 15:32:46 | INFO     | f0ddb893 | server:trace_id_middleware:57 - 📥 收到请求: GET /images/17c94f29-ff59-47a5-935a-c024a7ba6ece.png
+2026-08-14 15:32:46 | INFO     | f0ddb893 | server:trace_id_middleware:60 - 📤 请求完成: Status 304
+2026-08-14 15:32:46 | INFO     | 30dc13a0 | server:trace_id_middleware:60 - 📤 请求完成: Status 304
+2026-08-14 15:32:46 | INFO     | c217be46 | server:trace_id_middleware:60 - 📤 请求完成: Status 200
+2026-08-14 15:32:47 | INFO     | 06a157c1 | server:trace_id_middleware:57 - 📥 收到请求: GET /images/e039b210-4866-4d63-bd8f-9ee20ff029c2.png
+2026-08-14 15:32:47 | INFO     | dd8dda1c | server:trace_id_middleware:57 - 📥 收到请求: GET /images/e0b90f8e-8ec5-4a3c-9a52-f93cd733efed.png
+2026-08-14 15:32:47 | INFO     | 06a157c1 | server:trace_id_middleware:60 - 📤 请求完成: Status 304
+2026-08-14 15:32:47 | INFO     | dd8dda1c | server:trace_id_middleware:60 - 📤 请求完成: Status 304
+2026-08-14 15:33:30 | INFO     | 8967fa91 | server:trace_id_middleware:57 - 📥 收到请求: POST /api/start
+2026-08-14 15:33:30 | INFO     | 8967fa91 | server:trace_id_middleware:60 - 📤 请求完成: Status 200
+2026-08-14 15:33:30 | INFO     | 8967fa91 | node_timer:start_node_log:11 - 🔬 [researcher] 节点开始运行...
+2026-08-14 15:33:37 | INFO     | 8967fa91 | node_timer:end_node_log:22 - ✅ [researcher] 节点运行完毕, 耗时: 7.02s
+2026-08-14 15:33:37 | INFO     | 8967fa91 | node_timer:start_node_log:11 - ✍️ [copywriter] 节点开始运行...
+2026-08-14 15:33:37 | INFO     | 8967fa91 | graph_engine:copywriter_node:176 - ⏳ [Node: Copywriter] 正在生成文案...
+2026-08-14 15:33:43 | INFO     | 8967fa91 | node_timer:end_node_log:22 - ✅ [copywriter] 节点运行完毕, 耗时: 5.97s
+2026-08-14 15:33:43 | INFO     | 8967fa91 | node_timer:start_node_log:11 - 🧐 [critic] 节点开始运行...
+2026-08-14 15:33:54 | INFO     | 8967fa91 | node_timer:end_node_log:22 - ✅ [critic] 节点运行完毕, 耗时: 10.45s
+2026-08-14 15:33:54 | INFO     | 8967fa91 | node_timer:start_node_log:11 - 📱 [channel_adapter] 节点开始运行...
+2026-08-14 15:33:54 | INFO     | 8967fa91 | graph_engine:channel_adapter_node:336 - ⏳ [Node: ChannelAdapter] 正在适配渠道风格: 通用
+2026-08-14 15:33:54 | INFO     | 8967fa91 | node_timer:end_node_log:22 - ✅ [channel_adapter] 节点运行完毕, 耗时: 0.00s
+2026-08-14 15:33:54 | INFO     | 8967fa91 | server:event_generator:164 - ✅ 阶段1生成完毕，工作流已挂起等待人工审核。
+2026-08-14 15:34:00 | INFO     | a9d017ff | server:trace_id_middleware:57 - 📥 收到请求: POST /api/resume/1086ea75-3475-4850-abf3-2d925b542cf2
+2026-08-14 15:34:00 | INFO     | a9d017ff | server:trace_id_middleware:60 - 📤 请求完成: Status 200
+2026-08-14 15:34:00 | INFO     | a9d017ff | node_timer:start_node_log:11 - 🎨 [image_generator] 节点开始运行...
+2026-08-14 15:34:00 | INFO     | a9d017ff | graph_engine:image_generator_node:379 - ⏳ [Node: ImageGen] 正在根据 Prompt 生成图片: 一个充满科技感的多功能锂电手电钻套装摆在工作台上，周围散落着各种批头和正在组装的家具零件，背景是温馨...
+2026-08-14 15:34:32 | INFO     | a9d017ff | node_timer:end_node_log:22 - ✅ [image_generator] 节点运行完毕, 耗时: 32.27s
+2026-08-14 15:34:32 | INFO     | a9d017ff | node_timer:start_node_log:11 - 🔍 [visual_reviewer] 节点开始运行...
+2026-08-14 15:34:32 | INFO     | a9d017ff | graph_engine:visual_reviewer_node:445 - ⏳ [Node: VisualReviewer] 正在进行图文一致性审查...
+2026-08-14 15:34:33 | INFO     | a9d017ff | node_timer:end_node_log:22 - ✅ [visual_reviewer] 节点运行完毕, 耗时: 0.58s
+2026-08-14 15:34:33 | INFO     | a9d017ff | server:event_generator:266 - 🎉 工作流全部执行完毕！
+2026-08-14 15:34:33 | INFO     | 1df83f52 | server:trace_id_middleware:57 - 📥 收到请求: GET /images/1086ea75-3475-4850-abf3-2d925b542cf2.png
+2026-08-14 15:34:33 | INFO     | 1df83f52 | server:trace_id_middleware:60 - 📤 请求完成: Status 200
+2026-08-14 15:34:55 | INFO     | 59382279 | server:trace_id_middleware:57 - 📥 收到请求: POST /api/rate
+2026-08-14 15:34:56 | INFO     | 59382279 | server:trace_id_middleware:60 - 📤 请求完成: Status 200
+2026-08-14 15:38:10 | INFO     | b087e132 | server:trace_id_middleware:57 - 📥 收到请求: GET /api/history
+2026-08-14 15:38:10 | INFO     | b087e132 | server:trace_id_middleware:60 - 📤 请求完成: Status 200
+2026-08-14 15:38:11 | INFO     | 8cf42286 | server:trace_id_middleware:57 - 📥 收到请求: GET /images/1086ea75-3475-4850-abf3-2d925b542cf2.png
+2026-08-14 15:38:11 | INFO     | 8cf42286 | server:trace_id_middleware:60 - 📤 请求完成: Status 304
+2026-08-14 15:38:21 | INFO     | 7f722766 | server:trace_id_middleware:57 - 📥 收到请求: GET /images/e039b210-4866-4d63-bd8f-9ee20ff029c2.png
+2026-08-14 15:38:21 | INFO     | 7f722766 | server:trace_id_middleware:60 - 📤 请求完成: Status 304
+2026-08-14 15:39:01 | INFO     | 007bfb55 | server:trace_id_middleware:57 - 📥 收到请求: POST /api/rate
+2026-08-14 15:39:02 | INFO     | 007bfb55 | server:trace_id_middleware:60 - 📤 请求完成: Status 200
+2026-08-14 15:39:09 | INFO     | 2398dba1 | server:trace_id_middleware:57 - 📥 收到请求: POST /api/rate
+2026-08-14 15:39:09 | INFO     | 2398dba1 | server:trace_id_middleware:60 - 📤 请求完成: Status 200
+2026-08-14 15:39:14 | INFO     | 59439318 | server:trace_id_middleware:57 - 📥 收到请求: GET /images/1086ea75-3475-4850-abf3-2d925b542cf2.png
+2026-08-14 15:39:14 | INFO     | 59439318 | server:trace_id_middleware:60 - 📤 请求完成: Status 304
+2026-08-14 15:39:15 | INFO     | 863515a4 | server:trace_id_middleware:57 - 📥 收到请求: GET /api/history
+2026-08-14 15:39:15 | INFO     | 863515a4 | server:trace_id_middleware:60 - 📤 请求完成: Status 200
+2026-08-14 15:39:18 | INFO     | 98d2ff30 | server:trace_id_middleware:57 - 📥 收到请求: GET /images/e0b90f8e-8ec5-4a3c-9a52-f93cd733efed.png
+2026-08-14 15:39:18 | INFO     | 98d2ff30 | server:trace_id_middleware:60 - 📤 请求完成: Status 304
+2026-08-14 15:39:29 | INFO     | c796a1f2 | server:trace_id_middleware:57 - 📥 收到请求: POST /api/rate
+2026-08-14 15:39:29 | INFO     | c796a1f2 | server:trace_id_middleware:60 - 📤 请求完成: Status 200
+2026-08-14 15:39:34 | INFO     | 65731a19 | server:trace_id_middleware:57 - 📥 收到请求: GET /api/history
+2026-08-14 15:39:34 | INFO     | 65731a19 | server:trace_id_middleware:60 - 📤 请求完成: Status 200
+2026-08-14 15:39:42 | INFO     | da421fcc | server:trace_id_middleware:57 - 📥 收到请求: POST /api/rate
+2026-08-14 15:39:42 | INFO     | da421fcc | server:trace_id_middleware:60 - 📤 请求完成: Status 200
+2026-08-14 15:39:51 | INFO     | 7f2711b3 | server:trace_id_middleware:57 - 📥 收到请求: POST /api/rate
+2026-08-14 15:39:51 | INFO     | 7f2711b3 | server:trace_id_middleware:60 - 📤 请求完成: Status 200
+2026-08-14 15:39:55 | INFO     | ed4c6419 | server:trace_id_middleware:57 - 📥 收到请求: GET /api/history
+2026-08-14 15:39:55 | INFO     | ed4c6419 | server:trace_id_middleware:60 - 📤 请求完成: Status 200
+2026-08-14 15:39:59 | INFO     | 5d387848 | server:trace_id_middleware:57 - 📥 收到请求: GET /api/history
+2026-08-14 15:39:59 | INFO     | 5d387848 | server:trace_id_middleware:60 - 📤 请求完成: Status 200
+2026-08-14 15:39:59 | INFO     | 24b0ba8c | server:trace_id_middleware:57 - 📥 收到请求: GET /images/1086ea75-3475-4850-abf3-2d925b542cf2.png
+2026-08-14 15:39:59 | INFO     | 24b0ba8c | server:trace_id_middleware:60 - 📤 请求完成: Status 304
+2026-08-14 15:40:09 | INFO     | 8014845d | server:trace_id_middleware:57 - 📥 收到请求: GET /api/history
+2026-08-14 15:40:09 | INFO     | 8014845d | server:trace_id_middleware:60 - 📤 请求完成: Status 200
+2026-08-14 15:49:59 | INFO     | fe7a9a1e | server:trace_id_middleware:57 - 📥 收到请求: GET /api/history
+2026-08-14 15:49:59 | INFO     | fe7a9a1e | server:trace_id_middleware:60 - 📤 请求完成: Status 200
+2026-08-14 15:49:59 | INFO     | 332a4b60 | server:trace_id_middleware:57 - 📥 收到请求: GET /images/17c94f29-ff59-47a5-935a-c024a7ba6ece.png
+2026-08-14 15:49:59 | INFO     | ceec64f4 | server:trace_id_middleware:57 - 📥 收到请求: GET /images/1086ea75-3475-4850-abf3-2d925b542cf2.png
+2026-08-14 15:49:59 | INFO     | 332a4b60 | server:trace_id_middleware:60 - 📤 请求完成: Status 304
+2026-08-14 15:49:59 | INFO     | ceec64f4 | server:trace_id_middleware:60 - 📤 请求完成: Status 304
+2026-08-14 15:50:03 | INFO     | ecb9ded9 | server:trace_id_middleware:57 - 📥 收到请求: GET /api/history
+2026-08-14 15:50:03 | INFO     | ecb9ded9 | server:trace_id_middleware:60 - 📤 请求完成: Status 200
+2026-08-14 15:50:05 | INFO     | b0af0eb6 | server:trace_id_middleware:57 - 📥 收到请求: GET /images/e039b210-4866-4d63-bd8f-9ee20ff029c2.png
+2026-08-14 15:50:05 | INFO     | b0af0eb6 | server:trace_id_middleware:60 - 📤 请求完成: Status 304
+2026-08-14 15:50:05 | INFO     | 32343381 | server:trace_id_middleware:57 - 📥 收到请求: GET /images/e0b90f8e-8ec5-4a3c-9a52-f93cd733efed.png
+2026-08-14 15:50:05 | INFO     | 32343381 | server:trace_id_middleware:60 - 📤 请求完成: Status 304
+2026-08-14 15:50:09 | INFO     | 8c043a96 | server:trace_id_middleware:57 - 📥 收到请求: POST /api/rate
+2026-08-14 15:50:09 | INFO     | 8c043a96 | server:trace_id_middleware:60 - 📤 请求完成: Status 200
+2026-08-14 15:50:12 | INFO     | 0fb96e50 | server:trace_id_middleware:57 - 📥 收到请求: GET /api/history
+2026-08-14 15:50:12 | INFO     | 0fb96e50 | server:trace_id_middleware:60 - 📤 请求完成: Status 200
+2026-08-14 15:50:43 | INFO     | 55812b12 | server:trace_id_middleware:57 - 📥 收到请求: POST /api/rate
+2026-08-14 15:50:43 | INFO     | 55812b12 | server:trace_id_middleware:60 - 📤 请求完成: Status 200
+2026-08-14 15:50:46 | INFO     | 3419a84c | server:trace_id_middleware:57 - 📥 收到请求: GET /api/history
+2026-08-14 15:50:46 | INFO     | 3419a84c | server:trace_id_middleware:60 - 📤 请求完成: Status 200
+2026-08-14 15:50:49 | INFO     | dde56406 | server:trace_id_middleware:57 - 📥 收到请求: GET /api/history
+2026-08-14 15:50:49 | INFO     | dde56406 | server:trace_id_middleware:60 - 📤 请求完成: Status 200
+2026-08-14 17:20:12 | INFO     | d3dda51b | server:trace_id_middleware:57 - 📥 收到请求: GET /api/history
+2026-08-14 17:20:12 | INFO     | d3dda51b | server:trace_id_middleware:60 - 📤 请求完成: Status 200
+2026-08-14 17:20:13 | INFO     | 101c8388 | server:trace_id_middleware:57 - 📥 收到请求: GET /images/3d84e402-5ae2-4b3e-935d-0bc088d1e987.png
+2026-08-14 17:20:13 | INFO     | 73072438 | server:trace_id_middleware:57 - 📥 收到请求: GET /images/e0b90f8e-8ec5-4a3c-9a52-f93cd733efed.png
+2026-08-14 17:20:13 | INFO     | f36a3e39 | server:trace_id_middleware:57 - 📥 收到请求: GET /images/a7bd5c65-ffa8-483e-95cd-ac2ee6082ccf.png
+2026-08-14 17:20:13 | INFO     | eb456d03 | server:trace_id_middleware:57 - 📥 收到请求: GET /images/70df12bb-fb86-46e6-95dc-0403d3227208.png
+2026-08-14 17:20:13 | INFO     | 573840cd | server:trace_id_middleware:57 - 📥 收到请求: GET /images/1086ea75-3475-4850-abf3-2d925b542cf2.png
+2026-08-14 17:20:13 | INFO     | f36a3e39 | server:trace_id_middleware:60 - 📤 请求完成: Status 304
+2026-08-14 17:20:13 | INFO     | eb456d03 | server:trace_id_middleware:60 - 📤 请求完成: Status 304
+2026-08-14 17:20:13 | INFO     | 573840cd | server:trace_id_middleware:60 - 📤 请求完成: Status 304
+2026-08-14 17:20:13 | INFO     | 101c8388 | server:trace_id_middleware:60 - 📤 请求完成: Status 304
+2026-08-14 17:20:13 | INFO     | 73072438 | server:trace_id_middleware:60 - 📤 请求完成: Status 304
+2026-08-14 17:24:33 | INFO     | 1882e500 | server:trace_id_middleware:57 - 📥 收到请求: POST /api/start
+2026-08-14 17:24:33 | INFO     | 1882e500 | server:trace_id_middleware:60 - 📤 请求完成: Status 200
+2026-08-14 17:24:34 | INFO     | 1882e500 | node_timer:start_node_log:11 - 🔬 [researcher] 节点开始运行...
+2026-08-14 17:24:43 | INFO     | 1882e500 | node_timer:end_node_log:22 - ✅ [researcher] 节点运行完毕, 耗时: 9.10s
+2026-08-14 17:24:43 | INFO     | 1882e500 | node_timer:start_node_log:11 - ✍️ [copywriter] 节点开始运行...
+2026-08-14 17:24:43 | INFO     | 1882e500 | graph_engine:copywriter_node:176 - ⏳ [Node: Copywriter] 正在生成文案...
+2026-08-14 17:24:49 | INFO     | 1882e500 | node_timer:end_node_log:22 - ✅ [copywriter] 节点运行完毕, 耗时: 6.84s
+2026-08-14 17:24:49 | INFO     | 1882e500 | node_timer:start_node_log:11 - 🧐 [critic] 节点开始运行...
+2026-08-14 17:24:57 | INFO     | 1882e500 | node_timer:end_node_log:22 - ✅ [critic] 节点运行完毕, 耗时: 7.05s
+2026-08-14 17:24:57 | INFO     | 1882e500 | node_timer:start_node_log:11 - 📱 [channel_adapter] 节点开始运行...
+2026-08-14 17:24:57 | INFO     | 1882e500 | graph_engine:channel_adapter_node:336 - ⏳ [Node: ChannelAdapter] 正在适配渠道风格: 通用
+2026-08-14 17:24:57 | INFO     | 1882e500 | node_timer:end_node_log:22 - ✅ [channel_adapter] 节点运行完毕, 耗时: 0.00s
+2026-08-14 17:24:57 | INFO     | 1882e500 | server:event_generator:186 - ✅ 阶段1生成完毕，工作流已挂起等待人工审核。
+2026-08-14 17:25:06 | INFO     | 4a5a0ab7 | server:trace_id_middleware:57 - 📥 收到请求: POST /api/resume/cb307f15-721f-4a8c-aa50-a89fad9d84ea
+2026-08-14 17:25:06 | INFO     | 4a5a0ab7 | server:trace_id_middleware:60 - 📤 请求完成: Status 200
+2026-08-14 17:25:06 | INFO     | 4a5a0ab7 | node_timer:start_node_log:11 - 🎨 [image_generator] 节点开始运行...
+2026-08-14 17:25:06 | INFO     | 4a5a0ab7 | graph_engine:image_generator_node:379 - ⏳ [Node: ImageGen] 正在根据 Prompt 生成图片: 一把自然原木色的民谣吉他静置于阳光洒落的大学宿舍窗台，旁边放着一本翻开的乐谱和手机播放着教学视频，背...
+2026-08-14 17:25:40 | INFO     | 4a5a0ab7 | node_timer:end_node_log:22 - ✅ [image_generator] 节点运行完毕, 耗时: 34.09s
+2026-08-14 17:25:40 | INFO     | 4a5a0ab7 | node_timer:start_node_log:11 - 🔍 [visual_reviewer] 节点开始运行...
+2026-08-14 17:25:40 | INFO     | 4a5a0ab7 | graph_engine:visual_reviewer_node:445 - ⏳ [Node: VisualReviewer] 正在进行图文一致性审查...
+2026-08-14 17:25:40 | INFO     | 4a5a0ab7 | node_timer:end_node_log:22 - ✅ [visual_reviewer] 节点运行完毕, 耗时: 0.68s
+2026-08-14 17:25:40 | INFO     | 4a5a0ab7 | server:event_generator:288 - 🎉 工作流全部执行完毕！
+2026-08-14 17:25:41 | INFO     | e54349b9 | server:trace_id_middleware:57 - 📥 收到请求: GET /images/cb307f15-721f-4a8c-aa50-a89fad9d84ea.png
+2026-08-14 17:25:41 | INFO     | e54349b9 | server:trace_id_middleware:60 - 📤 请求完成: Status 200
+2026-08-14 17:25:52 | INFO     | 1c159b39 | server:trace_id_middleware:57 - 📥 收到请求: POST /api/rate
+2026-08-14 17:25:52 | INFO     | 1c159b39 | server:trace_id_middleware:60 - 📤 请求完成: Status 200
+2026-08-14 17:25:55 | INFO     | 81cae720 | server:trace_id_middleware:57 - 📥 收到请求: GET /api/history
+2026-08-14 17:25:55 | INFO     | 81cae720 | server:trace_id_middleware:60 - 📤 请求完成: Status 200

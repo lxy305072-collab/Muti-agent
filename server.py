@@ -1,3 +1,4 @@
+# server.py
 import sys
 import asyncio
 
@@ -11,7 +12,7 @@ import dashscope
 from db.db_repo import DatabaseRepo
 import uuid
 import redis
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
@@ -19,17 +20,15 @@ from fastapi import HTTPException
 import json
 from fastapi.responses import StreamingResponse
 from contextlib import asynccontextmanager
+from Tools.cache_tool import get_redis
+from config import IMAGE_DIR, settings
+from logger_config import set_trace_id, get_logger
 from agent.graph_engine import build_graph
 from langgraph.types import Command
-from Tools.cache_tool import get_redis
-from Tools.node_timer import print_session_summary, reset_session_stats
-from config import IMAGE_DIR
-from logger_config import set_trace_id, get_logger  # 🔥 新增
 
-logger = get_logger()  # 🔥 新增
+logger = get_logger()
 
-# 全局唯一的 Graph 实例
-DB_URI = os.getenv("POSTGRES_URI", "postgresql://myuser:123456@127.0.0.1:5432/marketing_db")
+DB_URI = os.getenv("POSTGRES_URI", settings.POSTGRES_URI)
 os.makedirs(IMAGE_DIR, exist_ok=True)
 
 
@@ -39,6 +38,7 @@ async def lifespan(app: FastAPI):
     app.state.pg_pool = pool
     app.state.db_repo = DatabaseRepo(pool)
 
+    # 🔥 核心修复：在 lifespan 中启动 graph
     async with build_graph() as graph_app:
         app.state.workflow_app = graph_app
         yield
@@ -49,9 +49,8 @@ async def lifespan(app: FastAPI):
 app = FastAPI(title="营销物料生成系统 API", lifespan=lifespan)
 
 
-# 🔥 全局 Trace ID 中间件
 @app.middleware("http")
-async def trace_id_middleware(request, call_next):
+async def trace_id_middleware(request: Request, call_next):
     tid = request.headers.get("X-Trace-ID", set_trace_id())
     set_trace_id(tid)
     logger.info(f"📥 收到请求: {request.method} {request.url.path}")
@@ -67,7 +66,6 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
-
 app.mount("/images", StaticFiles(directory=IMAGE_DIR), name="images")
 
 
@@ -86,6 +84,13 @@ class ResumeRequest(BaseModel):
 class RateRequest(BaseModel):
     thread_id: str
     score: int
+
+
+def get_client_ip(request: Request) -> str:
+    forwarded_for = request.headers.get("X-Forwarded-For")
+    if forwarded_for:
+        return forwarded_for.split(",")[0].strip()
+    return request.client.host if request.client else "unknown_client"
 
 
 def clean_state(obj):
@@ -115,10 +120,10 @@ async def get_embedding(text: str) -> list:
 
 
 @app.post("/api/start")
-async def start_workflow(req: StartRequest):
+async def start_workflow(req: StartRequest, request: Request):
     workflow_app = app.state.workflow_app
     r = get_redis()
-    client_ip = "test_user"
+    client_ip = get_client_ip(request)
     limit_key = f"rate_limit:start:{client_ip}"
 
     try:
@@ -126,9 +131,14 @@ async def start_workflow(req: StartRequest):
         if current_count == 1:
             await r.expire(limit_key, 10)
         if int(current_count) > 2:
+            logger.warning(f"⚠️ IP {client_ip} 触发限流")
             raise HTTPException(status_code=429, detail="请求太频繁，请喝杯茶稍后再试")
     except redis.exceptions.TimeoutError:
         pass
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"⚠️ 限流逻辑异常: {e}")
 
     thread_id = str(uuid.uuid4())
     config = {
@@ -140,7 +150,6 @@ async def start_workflow(req: StartRequest):
     initial_state = req.model_dump()
 
     async def event_generator():
-        reset_session_stats()
         yield f"data: {json.dumps({'type': 'init', 'thread_id': thread_id}, ensure_ascii=False)}\n\n"
 
         try:
@@ -174,6 +183,71 @@ async def start_workflow(req: StartRequest):
         except Exception as e:
             logger.exception(f"❌ /api/start 执行出错: {str(e)}")
             yield f"data: {json.dumps({'type': 'error', 'message': str(e)}, ensure_ascii=False)}\n\n"
+
+    return StreamingResponse(event_generator(), media_type="text/event-stream")
+
+
+@app.post("/api/resume/{thread_id}")
+async def get_resume_workflow(thread_id: str, req: ResumeRequest):
+    workflow_app = app.state.workflow_app
+    config = {
+        "configurable": {
+            "thread_id": thread_id,
+            "db_repo": app.state.db_repo
+        }
+    }
+
+    if not req.approved:
+        resume_input = Command(goto="copywriter", update={"feedback": req.feedback})
+    else:
+        current_state_before = await workflow_app.aget_state(config)
+        if not current_state_before.next:
+            return {"status": "error", "msg": "工作流未处于暂停状态或已完结"}
+        resume_input = None
+
+    async def event_generator():
+        try:
+            if not req.approved:
+                yield f"data: {json.dumps({'type': 'log', 'content': '⏳ 收到打回重写指令，正在根据反馈重写文案...'}, ensure_ascii=False)}\n\n"
+            else:
+                yield f"data: {json.dumps({'type': 'log', 'content': '🚀 接收到审核通过指令，准备恢复执行...'}, ensure_ascii=False)}\n\n"
+
+            async for event in workflow_app.astream(resume_input, config=config, stream_mode="custom"):
+                yield f"data: {json.dumps(event, ensure_ascii=False)}\n\n"
+
+            current_state = await workflow_app.aget_state(config)
+            safe_state = clean_state(current_state.values)
+
+            if req.approved and safe_state.get("image_url") and safe_state.get("title"):
+                try:
+                    await app.state.db_repo.finalize_material(
+                        thread_id=thread_id,
+                        title=safe_state["title"],
+                        body=safe_state["body"],
+                        image_prompt=safe_state.get("image_prompt", ""),
+                        image_url=safe_state["image_url"],
+                        review_passed=safe_state.get("review_passed", True),
+                        review_feedback=safe_state.get("review_feedback", ""),
+                        retry_count=safe_state.get("retry_count", 0)
+                    )
+                    yield f"data: {json.dumps({'type': 'log', 'content': '💾 物料基础信息已落库，请在完成后进行打分评价。'}, ensure_ascii=False)}\n\n"
+                except Exception as db_e:
+                    logger.error(f"⚠️ 落库失败: {db_e}")
+
+            logger.info("🎉 工作流全部执行完毕！")
+            yield f"data: {json.dumps({'type': 'log', 'content': '🎉 工作流全部执行完毕！'}, ensure_ascii=False)}\n\n"
+
+            final_payload = {
+                "type": "finished",
+                "thread_id": thread_id,
+                "status": "interrupted" if not req.approved else "finished",
+                "data": safe_state
+            }
+            yield f"data: {json.dumps(final_payload, ensure_ascii=False)}\n\n"
+
+        except Exception as e:
+            logger.exception(f"❌ /api/resume 执行出错: {str(e)}")
+            yield f"data: {json.dumps({'type': 'error', 'message': f'❌ 执行出错: {str(e)}'}, ensure_ascii=False)}\n\n"
 
     return StreamingResponse(event_generator(), media_type="text/event-stream")
 
@@ -213,72 +287,6 @@ async def delete_history_item(thread_id: str):
     except Exception as e:
         logger.error(f"⚠️ 删除历史失败: {e}")
         return {"status": "error", "msg": str(e)}
-
-
-@app.post("/api/resume/{thread_id}")
-async def get_resume_workflow(thread_id: str, req: ResumeRequest):
-    workflow_app = app.state.workflow_app
-    config = {
-        "configurable": {
-            "thread_id": thread_id,
-            "db_repo": app.state.db_repo
-        }
-    }
-
-    if not req.approved:
-        resume_input = Command(goto="copywriter", update={"feedback": req.feedback})
-    else:
-        current_state_before = await workflow_app.aget_state(config)
-        if not current_state_before.next:
-            return {"status": "error", "msg": "工作流未处于暂停状态或已完结"}
-        resume_input = None
-
-    async def event_generator():
-        reset_session_stats()
-        try:
-            if not req.approved:
-                yield f"data: {json.dumps({'type': 'log', 'content': '⏳ 收到打回重写指令，正在根据反馈重写文案...'}, ensure_ascii=False)}\n\n"
-            else:
-                yield f"data: {json.dumps({'type': 'log', 'content': '🚀 接收到审核通过指令，准备恢复执行...'}, ensure_ascii=False)}\n\n"
-
-            async for event in workflow_app.astream(resume_input, config=config, stream_mode="custom"):
-                yield f"data: {json.dumps(event, ensure_ascii=False)}\n\n"
-
-            current_state = (await workflow_app.aget_state(config)).values
-            safe_state = clean_state(current_state)
-
-            if req.approved and safe_state.get("image_url") and safe_state.get("title"):
-                try:
-                    await app.state.db_repo.finalize_material(
-                        thread_id=thread_id,
-                        title=safe_state["title"],
-                        body=safe_state["body"],
-                        image_prompt=safe_state.get("image_prompt", ""),
-                        image_url=safe_state["image_url"],
-                        review_passed=safe_state.get("review_passed", True),
-                        review_feedback=safe_state.get("review_feedback", ""),
-                        retry_count=safe_state.get("retry_count", 0)
-                    )
-                    yield f"data: {json.dumps({'type': 'log', 'content': '💾 物料基础信息已落库，请在完成后进行打分评价。'}, ensure_ascii=False)}\n\n"
-                except Exception as db_e:
-                    logger.error(f"⚠️ 落库失败: {db_e}")
-
-            logger.info("🎉 工作流全部执行完毕！")
-            yield f"data: {json.dumps({'type': 'log', 'content': '🎉 工作流全部执行完毕！'}, ensure_ascii=False)}\n\n"
-
-            final_payload = {
-                "type": "finished",
-                "thread_id": thread_id,
-                "status": "interrupted" if not req.approved else "finished",
-                "data": safe_state
-            }
-            yield f"data: {json.dumps(final_payload, ensure_ascii=False)}\n\n"
-
-        except Exception as e:
-            logger.exception(f"❌ /api/resume 执行出错: {str(e)}")
-            yield f"data: {json.dumps({'type': 'error', 'message': f'❌ 执行出错: {str(e)}'}, ensure_ascii=False)}\n\n"
-
-    return StreamingResponse(event_generator(), media_type="text/event-stream")
 
 
 @app.post("/api/rate")

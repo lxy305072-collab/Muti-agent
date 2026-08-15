@@ -2,8 +2,10 @@ import os
 
 import httpx
 
+from config import settings
+
 # 必须和 server.py 里的目录保持一致！
-PROJECT_ROOT = "E:/xt/muti-agent_dm1"
+PROJECT_ROOT = settings.PROJECT_ROOT
 SAVE_DIR = os.path.join(PROJECT_ROOT,"data","images")
 os.makedirs(SAVE_DIR, exist_ok=True)
 

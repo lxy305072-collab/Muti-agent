@@ -2,12 +2,14 @@
 from pydantic import BaseModel, Field,ValidationError
 import dashscope
 import json
-import os
+
 from dotenv import load_dotenv
+
+from config import settings
 
 load_dotenv()
 
-dashscope.api_key = os.getenv("DASH_API_KEY")
+dashscope.api_key =  settings.DASHSCOPE_API_KEY
 
 
 

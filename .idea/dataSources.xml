@@ -1,13 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="DataSourceManagerImpl" format="xml" multifile-model="true">
-    <data-source source="LOCAL" name="checkpoints" uuid="7aa56877-99b5-4f0b-9ea2-f5ca531152b7">
-      <driver-ref>sqlite.xerial</driver-ref>
-      <synchronize>true</synchronize>
-      <jdbc-driver>org.sqlite.JDBC</jdbc-driver>
-      <jdbc-url>jdbc:sqlite:E:\xt\muti-agent_dm1\checkpoints.db</jdbc-url>
-      <working-dir>$ProjectFileDir$</working-dir>
-    </data-source>
     <data-source source="LOCAL" name="postgres@localhost" uuid="8f8e3f50-a814-4039-b080-934109ac8d3d">
       <driver-ref>postgresql</driver-ref>
       <synchronize>true</synchronize>
