@@ -21,6 +21,8 @@ import json
 from fastapi.responses import StreamingResponse
 from contextlib import asynccontextmanager
 from Tools.cache_tool import get_redis
+from task_manager import task_manager
+from stream_subscriber import subscribe_events
 from config import IMAGE_DIR, settings
 from logger_config import set_trace_id, get_logger
 from agent.graph_engine import build_graph
@@ -51,6 +53,9 @@ app = FastAPI(title="营销物料生成系统 API", lifespan=lifespan)
 
 @app.middleware("http")
 async def trace_id_middleware(request: Request, call_next):
+    # 🔥 核心修复：如果是静态图片请求，直接放行，不打印日志，避免刷屏
+    if request.url.path.startswith("/images/"):
+        return await call_next(request)
     tid = request.headers.get("X-Trace-ID", set_trace_id())
     set_trace_id(tid)
     logger.info(f"📥 收到请求: {request.method} {request.url.path}")
@@ -149,42 +154,22 @@ async def start_workflow(req: StartRequest, request: Request):
     }
     initial_state = req.model_dump()
 
-    async def event_generator():
-        yield f"data: {json.dumps({'type': 'init', 'thread_id': thread_id}, ensure_ascii=False)}\n\n"
+    # 🔥 修改点：删除原来的 async def event_generator() 和 StreamingResponse
+    # 改为：启动后台任务，立即返回 thread_id
+    started = await task_manager.start_workflow_task(
+        workflow_app=workflow_app,
+        initial_state=initial_state,
+        config=config,
+        thread_id=thread_id,
+        req_data=req.model_dump(),
+        db_repo=app.state.db_repo,
+    )
 
-        try:
-            async for event in workflow_app.astream(initial_state, config=config, stream_mode="custom"):
-                yield f"data: {json.dumps(event, ensure_ascii=False)}\n\n"
+    if not started:
+        raise HTTPException(status_code=409, detail="任务启动失败（可能已在运行）")
 
-            current_state = await workflow_app.aget_state(config)
-            clean_data = clean_state(current_state.values)
-
-            if clean_data.get("title"):
-                await app.state.db_repo.upsert_material(
-                    thread_id=thread_id,
-                    product_name=req.product_name,
-                    key_features=req.key_features,
-                    target_audience=req.target_audience,
-                    title=clean_data["title"],
-                    body=clean_data.get("body", ""),
-                    image_prompt=clean_data.get("image_prompt", "")
-                )
-
-            logger.info("✅ 阶段1生成完毕，工作流已挂起等待人工审核。")
-
-            final_payload = {
-                "type": "finished",
-                "thread_id": thread_id,
-                "status": "interrupted" if current_state.next else "finished",
-                "data": clean_data
-            }
-            yield f"data: {json.dumps(final_payload, ensure_ascii=False)}\n\n"
-
-        except Exception as e:
-            logger.exception(f"❌ /api/start 执行出错: {str(e)}")
-            yield f"data: {json.dumps({'type': 'error', 'message': str(e)}, ensure_ascii=False)}\n\n"
-
-    return StreamingResponse(event_generator(), media_type="text/event-stream")
+    # 返回 thread_id，前端用它去订阅 GET /api/stream/{thread_id}
+    return {"thread_id": thread_id, "status": "started"}
 
 
 @app.post("/api/resume/{thread_id}")
@@ -197,59 +182,68 @@ async def get_resume_workflow(thread_id: str, req: ResumeRequest):
         }
     }
 
-    if not req.approved:
-        resume_input = Command(goto="copywriter", update={"feedback": req.feedback})
-    else:
-        current_state_before = await workflow_app.aget_state(config)
-        if not current_state_before.next:
-            return {"status": "error", "msg": "工作流未处于暂停状态或已完结"}
-        resume_input = None
+    # 🔥 修改点：删除原来的 if not req.approved 判断和 async def event_generator()
+    # 改为：启动后台任务，立即返回
+    started = await task_manager.resume_workflow_task(
+        workflow_app=workflow_app,
+        config=config,
+        thread_id=thread_id,
+        req=req,
+        db_repo=app.state.db_repo,
+    )
 
-    async def event_generator():
-        try:
-            if not req.approved:
-                yield f"data: {json.dumps({'type': 'log', 'content': '⏳ 收到打回重写指令，正在根据反馈重写文案...'}, ensure_ascii=False)}\n\n"
-            else:
-                yield f"data: {json.dumps({'type': 'log', 'content': '🚀 接收到审核通过指令，准备恢复执行...'}, ensure_ascii=False)}\n\n"
+    if not started:
+        raise HTTPException(status_code=409, detail="任务恢复失败（未处于暂停状态或已在运行）")
 
-            async for event in workflow_app.astream(resume_input, config=config, stream_mode="custom"):
-                yield f"data: {json.dumps(event, ensure_ascii=False)}\n\n"
+    return {"thread_id": thread_id, "status": "resumed"}
 
-            current_state = await workflow_app.aget_state(config)
-            safe_state = clean_state(current_state.values)
 
-            if req.approved and safe_state.get("image_url") and safe_state.get("title"):
-                try:
-                    await app.state.db_repo.finalize_material(
-                        thread_id=thread_id,
-                        title=safe_state["title"],
-                        body=safe_state["body"],
-                        image_prompt=safe_state.get("image_prompt", ""),
-                        image_url=safe_state["image_url"],
-                        review_passed=safe_state.get("review_passed", True),
-                        review_feedback=safe_state.get("review_feedback", ""),
-                        retry_count=safe_state.get("retry_count", 0)
-                    )
-                    yield f"data: {json.dumps({'type': 'log', 'content': '💾 物料基础信息已落库，请在完成后进行打分评价。'}, ensure_ascii=False)}\n\n"
-                except Exception as db_e:
-                    logger.error(f"⚠️ 落库失败: {db_e}")
+@app.get("/api/stream/{thread_id}")
+async def stream_events(thread_id: str, request: Request):
+    """
+    SSE 订阅任务事件流（支持断线重连）。
 
-            logger.info("🎉 工作流全部执行完毕！")
-            yield f"data: {json.dumps({'type': 'log', 'content': '🎉 工作流全部执行完毕！'}, ensure_ascii=False)}\n\n"
+    断线重连机制：
+    - 浏览器 EventSource 自动重连时，会自动带上 Last-Event-ID 请求头
+    - 也可通过 ?from=<msg_id> 手动指定起始位置（用于前端主动重连场景）
 
-            final_payload = {
-                "type": "finished",
-                "thread_id": thread_id,
-                "status": "interrupted" if not req.approved else "finished",
-                "data": safe_state
-            }
-            yield f"data: {json.dumps(final_payload, ensure_ascii=False)}\n\n"
+    使用示例（前端）：
+        const es = new EventSource('/api/stream/' + threadId);
+        es.onmessage = (e) => { ... };
+        // 服务端在每条消息前会发 id: <msg_id>，浏览器自动记录 lastEventId
+    """
+    # 校验任务是否存在
+    status = await task_manager.get_status(thread_id)
+    if not status:
+        raise HTTPException(status_code=404, detail="任务不存在或已过期")
 
-        except Exception as e:
-            logger.exception(f"❌ /api/resume 执行出错: {str(e)}")
-            yield f"data: {json.dumps({'type': 'error', 'message': f'❌ 执行出错: {str(e)}'}, ensure_ascii=False)}\n\n"
+    # 优先用 query 参数 from，其次用 Last-Event-ID 头，最后默认 "0"（读全部历史）
+    last_id = (
+            request.query_params.get("from")
+            or request.headers.get("Last-Event-ID")
+            or "0"
+    )
 
-    return StreamingResponse(event_generator(), media_type="text/event-stream")
+    return StreamingResponse(
+        subscribe_events(thread_id, last_id),
+        media_type="text/event-stream",
+        headers={
+            "Cache-Control": "no-cache",
+            "Connection": "keep-alive",
+            "X-Accel-Buffering": "no",  # 禁用 nginx 缓冲，保证 SSE 实时推送
+        },
+    )
+
+
+@app.get("/api/tasks/{thread_id}/status")
+async def get_task_status_api(thread_id: str):
+    """查询任务当前状态（用于前端轮询兜底）"""
+    status = await task_manager.get_status(thread_id)
+    if not status:
+        raise HTTPException(status_code=404, detail="任务不存在或已过期")
+    return status
+
+
 
 
 @app.get("/api/status/{thread_id}")
@@ -329,4 +323,5 @@ async def rate_material(req: RateRequest):
 if __name__ == "__main__":
     import uvicorn
 
-    uvicorn.run(app, host="0.0.0.0", port=8000, loop="asyncio", log_level="info")
+
+    uvicorn.run('server:app', host="0.0.0.0", port=8000, loop="asyncio", log_level="info")

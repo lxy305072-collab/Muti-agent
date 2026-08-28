@@ -2,71 +2,146 @@
 import { fetchEventSource } from '@microsoft/fetch-event-source';
 
 const API_BASE = "http://localhost:8000/api";
+const TASK_STORAGE_KEY = 'current_task_id';
 
-export const startWorkflow = (payload, callbacks) => {
-  let isFinished = false; // 标志位
-  return fetchEventSource(`${API_BASE}/start`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(payload),
+const connectSSE = (threadId, callbacks, lastEventId = null) => {
+  let isFinished = false;
+  let lastMessageTime = Date.now();
+
+  let url = `${API_BASE}/stream/${threadId}`;
+  if (lastEventId) {
+    url += `?from=${lastEventId}`;
+  }
+
+  const ctrl = new AbortController();
+
+  // 看门狗：8秒没收到数据，判定后端失联
+  const watchdog = setInterval(() => {
+    if (Date.now() - lastMessageTime > 8000) {
+      clearInterval(watchdog);
+      if (!isFinished) {
+        if (callbacks.onError) {
+          callbacks.onError("⚠️ 后端服务断开，任务已中断。请刷新页面尝试恢复进度。");
+        }
+        ctrl.abort();
+      }
+    }
+  }, 2000);
+
+  fetchEventSource(url, {
+    method: 'GET',
+    signal: ctrl.signal,
     onmessage(ev) {
+      lastMessageTime = Date.now();
       try {
         const chunk = JSON.parse(ev.data);
         const type = chunk.type;
+        if (type === 'heartbeat') return;
+
+        if (ev.id) lastEventId = ev.id;
 
         if (type === 'title_chunk' && callbacks.onTitle) callbacks.onTitle(chunk.content);
         else if (type === 'body_chunk' && callbacks.onBody) callbacks.onBody(chunk.content);
         else if (type === 'log' && callbacks.onLog) callbacks.onLog(chunk.content);
         else if (type === 'finished') {
-          isFinished = true; // 标记为正常结束
+          isFinished = true;
+          clearInterval(watchdog);
           if (callbacks.onFinished) callbacks.onFinished(chunk);
+          ctrl.abort();
         }
-        else if (type === 'error' && callbacks.onError) callbacks.onError(chunk.message);
+        else if (type === 'error' && callbacks.onError) {
+          isFinished = true;
+          clearInterval(watchdog);
+          callbacks.onError(chunk.message);
+          ctrl.abort();
+        }
       } catch (e) {
         console.error("解析 SSE 失败:", e);
       }
     },
     onclose() {
-      // 如果后端已经发送了 finished 事件，说明是正常结束，不报错
-      if (!isFinished && callbacks.onError) {
-        callbacks.onError("连接异常断开 (后端可能崩溃了)");
+      clearInterval(watchdog);
+      if (isFinished) {
+        if (callbacks.onClose) callbacks.onClose();
+      } else {
+        if (callbacks.onError) {
+          callbacks.onError("⚠️ 后端服务断开，任务已中断。请刷新页面尝试恢复进度。");
+        }
       }
-      if (callbacks.onClose) callbacks.onClose();
+      throw new Error('Stop default retry');
     },
+    onerror(err) {
+      clearInterval(watchdog);
+      if (isFinished) {
+        throw new Error('Stop default retry');
+      }
+      if (callbacks.onError) {
+        callbacks.onError("⚠️ 网络断开或后端服务崩溃，任务已中断。请刷新页面尝试恢复进度。");
+      }
+      throw new Error('Stop default retry');
+    }
   });
+
+  return ctrl;
 };
 
-// 恢复工作流 (人工审核通过/打回)
-export const resumeWorkflow = (threadId, payload, callbacks) => {
-  let isFinished = false; // 标志位
-  return fetchEventSource(`${API_BASE}/resume/${threadId}`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(payload),
-    onmessage(ev) {
-      try {
-        const chunk = JSON.parse(ev.data);
-        const type = chunk.type;
+// 启动工作流
+export const startWorkflow = async (payload, callbacks) => {
+  try {
+    // 🔥 如果后端断开，fetch 会直接抛出异常，被这里捕获
+    const res = await fetch(`${API_BASE}/start`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
 
-        if (type === 'title_chunk' && callbacks.onTitle) callbacks.onTitle(chunk.content);
-        else if (type === 'body_chunk' && callbacks.onBody) callbacks.onBody(chunk.content);
-        else if (type === 'log' && callbacks.onLog) callbacks.onLog(chunk.content);
-        else if (type === 'finished') {
-          isFinished = true; // 标记为正常结束
-          if (callbacks.onFinished) callbacks.onFinished(chunk);
-        }
-        else if (type === 'error' && callbacks.onError) callbacks.onError(chunk.message);
-      } catch (e) {
-        console.error("解析 SSE 失败:", e);
-      }
-    },
-    onclose() {
-      if (!isFinished && callbacks.onError) {
-        callbacks.onError("连接异常断开 (后端可能崩溃了)");
-      }
-      if (callbacks.onClose) callbacks.onClose();
-    },
-  });
+    if (!res.ok) {
+      const errData = await res.json().catch(() => ({}));
+      if (callbacks.onError) callbacks.onError(errData.detail || "启动任务失败");
+      return;
+    }
+
+    const { thread_id } = await res.json();
+    localStorage.setItem(TASK_STORAGE_KEY, thread_id);
+    return connectSSE(thread_id, callbacks, "0");
+  } catch (err) {
+    // 🔥 捕获网络异常，走 onError 回调
+    if (callbacks.onError) callbacks.onError("⚠️ 无法连接到后端服务，请检查服务是否已启动。");
+  }
+};
+
+// 恢复工作流
+export const resumeWorkflow = async (threadId, payload, callbacks) => {
+  try {
+    const res = await fetch(`${API_BASE}/resume/${threadId}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+
+    if (!res.ok) {
+      const errData = await res.json().catch(() => ({}));
+      if (callbacks.onError) callbacks.onError(errData.detail || "恢复任务失败");
+      return;
+    }
+
+    localStorage.setItem(TASK_STORAGE_KEY, threadId);
+    return connectSSE(threadId, callbacks, "$");
+  } catch (err) {
+    // 🔥 捕获网络异常，走 onError 回调
+    if (callbacks.onError) callbacks.onError("⚠️ 无法连接到后端服务，请检查服务是否已启动。");
+  }
+};
+
+// 页面刷新后重连任务
+export const reconnectWorkflow = (callbacks) => {
+  const threadId = localStorage.getItem(TASK_STORAGE_KEY);
+  if (!threadId) return null;
+  return connectSSE(threadId, callbacks, "0");
+};
+
+export const clearCurrentTask = () => {
+  localStorage.removeItem(TASK_STORAGE_KEY);
 };
 
 // 获取历史物料
