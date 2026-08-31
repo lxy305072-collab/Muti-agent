@@ -3,13 +3,18 @@ requests>=2.31.0
 fastapi>=0.110.0
 uvicorn[standard]>=0.29.0
 pydantic>=2.6.0
+pydantic-settings>=2.2.0  # 🔥 新增：config.py 中使用了 BaseSettings
 python-dotenv>=1.0.0
+loguru>=0.7.2             # 🔥 新增：logger_config.py 中使用了 loguru
 
-# LangGraph 核心及 SQLite 持久化组件
+# LangGraph 核心及 PostgreSQL 持久化组件
 langgraph>=0.1.0
-langgraph-checkpoint-sqlite>=1.0.0
+langgraph-checkpoint-postgres>=1.0.0  # 🔥 修改：从 SQLite 换成 PostgreSQL
+asyncpg>=0.29.0             # 🔥 新增：异步驱动 PostgreSQL
 
 # 大模型 SDK
 openai>=1.14.0
 dashscope>=1.17.0
+
+# 异步任务队列及缓存
 redis~=5.3.1

@@ -1,0 +1,21 @@
+2026-08-31 14:45:23 | INFO     | 97f15714 | server:trace_id_middleware:60 - 📥 收到请求: POST /api/start
+2026-08-31 14:45:23 | INFO     | 97f15714 | task_manager:start_workflow_task:128 - 🚀 后台任务已启动: f49e541d-1ebb-43b0-9e4b-5a17dbf89dae
+2026-08-31 14:45:23 | INFO     | 97f15714 | server:trace_id_middleware:63 - 📤 请求完成: Status 200
+2026-08-31 14:45:23 | INFO     | 336230a5 | server:trace_id_middleware:60 - 📥 收到请求: GET /api/stream/f49e541d-1ebb-43b0-9e4b-5a17dbf89dae
+2026-08-31 14:45:23 | INFO     | 336230a5 | server:trace_id_middleware:63 - 📤 请求完成: Status 200
+2026-08-31 14:45:23 | INFO     | f49e541d | node_timer:start_node_log:11 - 🔬 [researcher] 节点开始运行...
+2026-08-31 14:45:25 | INFO     | 7ee439c1 | server:trace_id_middleware:60 - 📥 收到请求: GET /api/history
+2026-08-31 14:45:25 | INFO     | 7ee439c1 | server:trace_id_middleware:63 - 📤 请求完成: Status 200
+2026-08-31 14:45:33 | INFO     | ca27b574 | server:trace_id_middleware:60 - 📥 收到请求: GET /api/history
+2026-08-31 14:45:33 | INFO     | ca27b574 | server:trace_id_middleware:63 - 📤 请求完成: Status 200
+2026-08-31 14:45:34 | INFO     | f49e541d | node_timer:end_node_log:22 - ✅ [researcher] 节点运行完毕, 耗时: 10.59s
+2026-08-31 14:45:34 | INFO     | f49e541d | node_timer:start_node_log:11 - ✍️ [copywriter] 节点开始运行...
+2026-08-31 14:45:34 | INFO     | f49e541d | graph_engine:copywriter_node:182 - ⏳ [Node: Copywriter] 正在生成文案...
+2026-08-31 14:45:39 | INFO     | f49e541d | node_timer:end_node_log:22 - ✅ [copywriter] 节点运行完毕, 耗时: 5.68s
+2026-08-31 14:45:39 | INFO     | f49e541d | node_timer:start_node_log:11 - 🧐 [critic] 节点开始运行...
+2026-08-31 14:45:50 | INFO     | f49e541d | node_timer:end_node_log:22 - ✅ [critic] 节点运行完毕, 耗时: 10.28s
+2026-08-31 14:45:50 | INFO     | f49e541d | node_timer:start_node_log:11 - 📱 [channel_adapter] 节点开始运行...
+2026-08-31 14:45:50 | INFO     | f49e541d | graph_engine:channel_adapter_node:342 - ⏳ [Node: ChannelAdapter] 正在适配渠道风格: 小红书
+2026-08-31 14:45:56 | INFO     | f49e541d | graph_engine:channel_adapter_node:363 - ✅ [Node: ChannelAdapter] 适配完成！新标题: 💥救命！这小方块让我从Vlog废柴逆袭成...
+2026-08-31 14:45:56 | INFO     | f49e541d | node_timer:end_node_log:22 - ✅ [channel_adapter] 节点运行完毕, 耗时: 6.28s
+2026-08-31 14:45:56 | INFO     | f49e541d | task_manager:_run_workflow:222 - ✅ 阶段1生成完毕，工作流已挂起等待人工审核。

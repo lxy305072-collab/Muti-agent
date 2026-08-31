@@ -1,7 +1,6 @@
 # server.py
-import sys
 import asyncio
-
+import sys
 # 🔥 强制在所有操作之前覆盖 Windows 事件循环策略
 if sys.platform == 'win32':
     asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
@@ -323,5 +322,20 @@ async def rate_material(req: RateRequest):
 if __name__ == "__main__":
     import uvicorn
 
+    config = uvicorn.Config(
+        app,
+        host="0.0.0.0",
+        port=8000,
+        log_level="info",
+    )
 
-    uvicorn.run('server:app', host="0.0.0.0", port=8000, loop="asyncio", log_level="info")
+    server = uvicorn.Server(config)
+
+    # Windows + psycopg 异步模式必须使用 SelectorEventLoop
+    loop = asyncio.SelectorEventLoop()
+    asyncio.set_event_loop(loop)
+
+    try:
+        loop.run_until_complete(server.serve())
+    finally:
+        loop.close()
