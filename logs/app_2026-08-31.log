@@ -19,3 +19,5 @@
 2026-08-31 14:45:56 | INFO     | f49e541d | graph_engine:channel_adapter_node:363 - ✅ [Node: ChannelAdapter] 适配完成！新标题: 💥救命！这小方块让我从Vlog废柴逆袭成...
 2026-08-31 14:45:56 | INFO     | f49e541d | node_timer:end_node_log:22 - ✅ [channel_adapter] 节点运行完毕, 耗时: 6.28s
 2026-08-31 14:45:56 | INFO     | f49e541d | task_manager:_run_workflow:222 - ✅ 阶段1生成完毕，工作流已挂起等待人工审核。
+2026-08-31 15:20:19 | INFO     | 4e955012 | server:trace_id_middleware:60 - 📥 收到请求: GET /api/history
+2026-08-31 15:20:19 | INFO     | 4e955012 | server:trace_id_middleware:63 - 📤 请求完成: Status 200
