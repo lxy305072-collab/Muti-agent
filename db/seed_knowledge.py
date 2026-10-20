@@ -50,15 +50,28 @@ async def main():
         vec_str = "[" + ",".join(map(str, embedding)) + "]"
 
         async with pool.acquire() as conn:
-            # 🔥 优化：使用 ON CONFLICT 防止重复运行脚本时数据重复插入
-            await conn.execute("""
-                INSERT INTO knowledge_docs (doc_type, title, content, embedding)
-                VALUES ($1, $2, $3, $4::vector)
-                ON CONFLICT (title) DO UPDATE SET 
-                    content=EXCLUDED.content, 
-                    embedding=EXCLUDED.embedding
-            """, doc['doc_type'], doc['title'], doc['content'], vec_str)
-        print(f"✅ 已写入: {doc['title']}")
+            # 🔥 幂等写入：先按 title 更新，未命中再插入。整体包在事务里保证原子性。
+            #    这里刻意不用 ON CONFLICT (title) —— 该写法要求 title 上有唯一约束，
+            #    而已存在的数据库不会重跑 init.sql，约束可能缺失，脚本会直接报错。
+            #    下面的写法在有无唯一约束的情况下都能正常工作。
+            async with conn.transaction():
+                updated = await conn.fetchval("""
+                    UPDATE knowledge_docs
+                    SET doc_type  = $1,
+                        content   = $3,
+                        embedding = $4::vector
+                    WHERE title = $2
+                    RETURNING id
+                """, doc['doc_type'], doc['title'], doc['content'], vec_str)
+
+                if updated is None:
+                    await conn.execute("""
+                        INSERT INTO knowledge_docs (doc_type, title, content, embedding)
+                        VALUES ($1, $2, $3, $4::vector)
+                    """, doc['doc_type'], doc['title'], doc['content'], vec_str)
+                    print(f"✅ 已新增: {doc['title']}")
+                else:
+                    print(f"✅ 已更新: {doc['title']}")
 
     await pool.close()
     print("🎉 知识库初始化完成！")

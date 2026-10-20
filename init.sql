@@ -70,10 +70,14 @@ CREATE TABLE IF NOT EXISTS material_iterations (
 );
 
 -- 知识库表 (品牌规范/优秀范例)
+-- ⚠️ title 上的唯一约束是 seed_knowledge.py 幂等写入的前提。
+--    已有数据库不会重跑本脚本，需手动执行一次：
+--    ALTER TABLE knowledge_docs ADD CONSTRAINT uq_knowledge_docs_title UNIQUE (title);
+--    （若表中已存在重复 title，需先清理重复行）
 CREATE TABLE IF NOT EXISTS knowledge_docs (
     id          BIGSERIAL PRIMARY KEY,
     doc_type    TEXT NOT NULL,
-    title       TEXT,
+    title       TEXT UNIQUE,
     content     TEXT NOT NULL,
     meta        JSONB DEFAULT '{}',
     embedding   VECTOR(1024),

@@ -1,16 +1,30 @@
-# React + Vite
+# 前端 · 营销物料生成工作台
 
-This template provides a minimal setup to get React working in Vite with HMR and some Oxlint rules.
+React 19 + Vite 8 + Tailwind CSS 3 实现的前端界面，包含工作台、人工审核弹窗、评分与历史物料画廊。
 
-Currently, two official plugins are available:
+完整的项目说明、技术架构与快速开始请见 [根目录 README](../README.md)。
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+## 启动
 
-## React Compiler
+```bash
+npm install
+npm run dev
+```
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+开发服务器监听 `http://localhost:5173`，`/api` 请求由 Vite 代理转发到后端 `http://localhost:8000`（见 `vite.config.js`）。
 
-## Expanding the Oxlint configuration
+## 关键文件
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and Oxlint's TypeScript related rules in your project.
+| 文件 | 说明 |
+|---|---|
+| `src/App.jsx` | 主界面。工作台表单、Agent 节点进度条、实时日志面板、人工审核弹窗、评分区、历史画廊分页 |
+| `src/api.js` | API 封装。基于 `@microsoft/fetch-event-source` 的 SSE 客户端，含 60s 看门狗与断线重连；任务 ID 存于 `localStorage`，刷新页面可恢复进度 |
+
+## 可用命令
+
+| 命令 | 作用 |
+|---|---|
+| `npm run dev` | 启动开发服务器 |
+| `npm run build` | 生产构建 |
+| `npm run preview` | 预览生产构建 |
+| `npm run lint` | Oxlint 代码检查 |
