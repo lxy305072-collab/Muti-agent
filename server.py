@@ -4,6 +4,8 @@ import sys
 # 🔥 强制在所有操作之前覆盖 Windows 事件循环策略
 if sys.platform == 'win32':
     asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
+from dotenv import load_dotenv
+load_dotenv()
 
 import os
 import asyncpg
@@ -130,19 +132,19 @@ async def start_workflow(req: StartRequest, request: Request):
     client_ip = get_client_ip(request)
     limit_key = f"rate_limit:start:{client_ip}"
 
-    try:
-        current_count = await r.incr(limit_key)
-        if current_count == 1:
-            await r.expire(limit_key, 10)
-        if int(current_count) > 2:
-            logger.warning(f"⚠️ IP {client_ip} 触发限流")
-            raise HTTPException(status_code=429, detail="请求太频繁，请喝杯茶稍后再试")
-    except redis.exceptions.TimeoutError:
-        pass
-    except HTTPException:
-        raise
-    except Exception as e:
-        logger.error(f"⚠️ 限流逻辑异常: {e}")
+    # try:
+    #     current_count = await r.incr(limit_key)
+    #     if current_count == 1:
+    #         await r.expire(limit_key, 10)
+    #     if int(current_count) > 2:
+    #         logger.warning(f"⚠️ IP {client_ip} 触发限流")
+    #         raise HTTPException(status_code=429, detail="请求太频繁，请喝杯茶稍后再试")
+    # except redis.exceptions.TimeoutError:
+    #     pass
+    # except HTTPException:
+    #     raise
+    # except Exception as e:
+    #     logger.error(f"⚠️ 限流逻辑异常: {e}")
 
     thread_id = str(uuid.uuid4())
     config = {

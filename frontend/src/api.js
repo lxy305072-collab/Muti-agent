@@ -15,9 +15,11 @@ const connectSSE = (threadId, callbacks, lastEventId = null) => {
 
   const ctrl = new AbortController();
 
-  // 看门狗：8秒没收到数据，判定后端失联
+  // 看门狗：60秒没收到数据才判定后端失联。
+  // 阈值不能用 8 秒——图像生成等节点单次执行就可能耗时 60s+，期间没有业务事件，
+  // 只能靠心跳续命；阈值过小会在节点正常执行时误判断连并 abort。
   const watchdog = setInterval(() => {
-    if (Date.now() - lastMessageTime > 8000) {
+    if (Date.now() - lastMessageTime > 60000) {
       clearInterval(watchdog);
       if (!isFinished) {
         if (callbacks.onError) {

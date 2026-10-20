@@ -1,6 +1,12 @@
 # 忽略 PostgreSQL 数据目录
-data/pgdata/
+data/
 # 忽略 Python 缓存文件
 __pycache__/
 *.py[cod]
 *$py.class
+*.env
+.idea/
+.workbuddy/
+frontend/node_modules/
+logs/
+test/

@@ -1,5 +1,6 @@
 import asyncio
 import dashscope
+from dashscope import MultiModalConversation
 import json
 import os
 import re
@@ -376,6 +377,71 @@ async def channel_adapter_node(state: CampaignState):
 SUPPORTED_IMAGE_SIZES = ['1024*1024', '960*1280', '768*1024', '720*1280']
 DEFAULT_IMAGE_SIZE = '1024*1024'
 
+# ⚠️ 千问图像系列(qwen-image-*)与通义万相(wanx*)走的是两个不同的 DashScope 端点，互不通用：
+#    qwen-image-*  -> MultiModalConversation   (/aigc/multimodal-generation/generation)
+#    wanx*         -> ImageSynthesis           (/aigc/text2image/image-synthesis)
+#    用错端点服务端只会回一个极具误导性的 "url error, please check url!"（实际与 URL 无关）
+QWEN_IMAGE_MODEL_PREFIX = 'qwen-image'
+NEGATIVE_PROMPT = ('低分辨率,低画质,肢体畸形,手指畸形,画面过饱和,蜡像感,'
+                   '人脸无细节,过度光滑,画面具有AI感,构图混乱,文字模糊扭曲')
+
+
+def _is_qwen_image_model(model: str) -> bool:
+    return (model or '').startswith(QWEN_IMAGE_MODEL_PREFIX)
+
+
+def _call_image_api(model: str, prompt: str, size: str):
+    """根据模型名选择正确的 DashScope 接口生成图片"""
+    if _is_qwen_image_model(model):
+        return MultiModalConversation.call(
+            model=model,
+            messages=[{"role": "user", "content": [{"text": prompt}]}],
+            size=size,
+            prompt_extend=True,
+            negative_prompt=NEGATIVE_PROMPT,
+            watermark=False,
+        )
+    return dashscope.ImageSynthesis.call(model=model, prompt=prompt, n=1, size=size)
+
+
+def _as_dict(obj):
+    """把 DashScope 响应对象/字典统一成字典访问"""
+    if obj is None:
+        return {}
+    if isinstance(obj, dict):
+        return obj
+    return vars(obj) if hasattr(obj, '__dict__') else {}
+
+
+def _extract_image_url(model: str, rsp) -> str | None:
+    """从不同接口的响应结构中取出图片 URL"""
+    if not rsp or not getattr(rsp, 'output', None):
+        return None
+    output = _as_dict(rsp.output)
+
+    if _is_qwen_image_model(model):
+        # output.choices[0].message.content[0]["image"]
+        choices = output.get('choices') or []
+        if isinstance(choices, list) and choices:
+            message = _as_dict(choices[0]).get('message')
+            content = _as_dict(message).get('content') or []
+            if isinstance(content, list):
+                for item in content:
+                    if isinstance(item, dict) and item.get('image'):
+                        return item['image']
+        return None
+
+    # ImageSynthesis: output.results[0].url
+    results = output.get('results') or []
+    if isinstance(results, list) and results:
+        return _as_dict(results[0]).get('url')
+    return None
+
+
+def _err_of(rsp) -> str:
+    """抽出接口返回的错误码与错误信息，避免排查时只能看到一串 JSON"""
+    return f"{getattr(rsp, 'code', '?')} - {getattr(rsp, 'message', str(rsp))}"
+
 
 async def image_generator_node(state: CampaignState):
     _start_ts = start_node_log("image_generator", "🎨", state)
@@ -390,22 +456,17 @@ async def image_generator_node(state: CampaignState):
             logger.warning(f"⚠️ 配置的尺寸 {target_size} 不合法，降级使用默认尺寸 1024*1024")
             target_size = '1024*1024'
 
-        def _generate_image_sync():
-            return dashscope.ImageSynthesis.call(model=settings.MODEL_IMAGE, prompt=state["image_prompt"], n=1,
-                                                 size=target_size)
-
         max_retries = 3
         remote_url = None
+        model = settings.MODEL_IMAGE
         for attempt in range(max_retries):
-            rsp = await asyncio.to_thread(_generate_image_sync)
+            rsp = await asyncio.to_thread(_call_image_api, model, state["image_prompt"], target_size)
             if rsp and rsp.status_code == 200:
-                if hasattr(rsp, 'output') and rsp.output:
-                    output = rsp.output if isinstance(rsp.output, dict) else vars(rsp.output)
-                    results = output.get('results', [])
-                    if results and isinstance(results, list):
-                        remote_url = results[0].get('url') if isinstance(results[0], dict) else results[0].url
-                        break
-            logger.warning(f"⚠️ [Node: ImageGen] 第 {attempt + 1} 次画图失败，准备重试...")
+                remote_url = _extract_image_url(model, rsp)
+                if remote_url:
+                    break
+            logger.warning(
+                f"⚠️ [Node: ImageGen] 第 {attempt + 1} 次画图失败（模型 {model}）: {_err_of(rsp)}")
             writer({"type": "log", "content": f"⚠️ 画图接口异常，第 {attempt + 1} 次重试中..."})
             await asyncio.sleep(2 ** attempt)
 

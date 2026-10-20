@@ -46,6 +46,11 @@ CREATE TABLE IF NOT EXISTS materials (
     user_rating     SMALLINT,
     user_comment    TEXT,
 
+    -- 质量评分（历史排序、打分接口、few-shot 检索均依赖这三列）
+    quality_score   SMALLINT DEFAULT 0,
+    title_score     SMALLINT DEFAULT 0,
+    body_score      SMALLINT DEFAULT 0,
+
     created_at      TIMESTAMPTZ DEFAULT now(),
     updated_at      TIMESTAMPTZ DEFAULT now(),
     finished_at     TIMESTAMPTZ

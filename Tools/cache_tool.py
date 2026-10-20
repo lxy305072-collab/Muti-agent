@@ -2,12 +2,13 @@
 import os
 import json
 import hashlib
-import redis.asyncio as redis
-from config import settings
 from dotenv import load_dotenv
 
+# ⚠️ 必须先加载 .env，再 import config —— 否则 settings 读不到最新环境变量
 load_dotenv()
 
+import redis.asyncio as redis
+from config import settings
 
 
 redis_pool = redis.ConnectionPool.from_url(

@@ -9,6 +9,7 @@ services:
     volumes:
       - redis-data:/data    # 将数据挂载到当前目录的 redis-data 文件夹
     # 如果没有挂载 redis.conf，可以直接用：
+    # ⚠️ 必须与 .env / config.py 的 REDIS_PASSWORD 保持一致，否则客户端 AUTH 会报错
     command: redis-server --appendonly yes --requirepass "MySecretPass123"
 
   postgres:

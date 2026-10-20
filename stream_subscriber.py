@@ -62,8 +62,9 @@ async def subscribe_events(thread_id: str, last_event_id: str = "0") -> AsyncGen
                 if idle_time > SUBSCRIBE_IDLE_TIMEOUT:
                     yield f"data: {json.dumps({'type': 'timeout', 'message': '订阅超时，请重新连接'}, ensure_ascii=False)}\n\n"
                     return
-                # SSE 注释行，浏览器忽略，仅维持连接
-                yield ": heartbeat\n\n"
+                # ⚠️ 必须发真正的 data 事件：SSE 注释行（以 : 开头）会被浏览器直接丢弃，
+                #    前端 onmessage 收不到就无法刷新看门狗计时，会被误判为"后端失联"而断连
+                yield f"data: {json.dumps({'type': 'heartbeat'}, ensure_ascii=False)}\n\n"
                 continue
 
             idle_start = asyncio.get_event_loop().time()
